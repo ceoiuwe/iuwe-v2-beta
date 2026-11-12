@@ -396,9 +396,11 @@
             });
         })();
     </script>
-    <!-- SDK Oficial Firebase (App + Authentication OAuth 2.0 Google) -->
-    <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-app-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-auth-compat.js"></script>
+    <!-- SDK Oficial Firebase (App + Authentication OAuth 2.0 Google - CDN Oficial Google gstatic + Fallback Cloudflare) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.13.2/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.13.2/firebase-auth-compat.min.js"></script>
     <script src="firebase-config.js"></script>
 </head>
 <body class="font-sans antialiased pb-12">
@@ -5926,7 +5928,7 @@
         // ============================================================================
         const ARCHIVE_STORAGE_KEY = 'iuwe_step5_unified_archive_v1';
         const DEFAULT_FIREBASE_URL = 'https://iuwe-v2-d06c4-default-rtdb.firebaseio.com/';
-        const DEFAULT_GAS_WEBHOOK = 'https://script.google.com/macros/s/AKfycbxbWXGA2dMJB4y_etqm1aNIwarTYmRs2o5jgnk2sbCphrXCyUprQoIze30NvRRSAkKT/exec';
+        const DEFAULT_GAS_WEBHOOK = (typeof window.IUWE_GAS_DOORKEEPER_URL === 'string' && window.IUWE_GAS_DOORKEEPER_URL.trim()) ? window.IUWE_GAS_DOORKEEPER_URL.trim() : 'https://script.google.com/macros/s/AKfycbxbWXGA2dMJB4y_etqm1aNIwarTYmRs2o5jgnk2sbCphrXCyUprQoIze30NvRRSAkKT/exec';
 
         let archiveRecords = [];
         let streamMemoryCache = {};
@@ -6769,6 +6771,8 @@
             `;
         }
 
+        const TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+        function appendLifecycleAudit(eventType, archiveId, summary) { if (typeof appendLifecycleAuditEvent === 'function') appendLifecycleAuditEvent(archiveId, eventType, summary, 'TRASH_LGPD'); }
         function isRecordArchivedLgpd(rec) {
             return rec && (rec.status === 'ARCHIVED_LGPD' || rec.status === 'ARCHIVED_LGPD_LEGACY');
         }
@@ -7824,11 +7828,14 @@
             const baseCfg = (typeof window.IUWE_FIREBASE_CONFIG === 'object' && window.IUWE_FIREBASE_CONFIG)
                 ? { ...window.IUWE_FIREBASE_CONFIG }
                 : {
-                    apiKey: "COLE_AQUI_SUA_API_KEY_DO_FIREBASE",
+                    apiKey: "AIzaSyB8yKKt2BzdMPfpNYttbABUvE40X05vqhc",
                     authDomain: "iuwe-v2-d06c4.firebaseapp.com",
                     databaseURL: "https://iuwe-v2-d06c4-default-rtdb.firebaseio.com",
                     projectId: "iuwe-v2-d06c4",
-                    storageBucket: "iuwe-v2-d06c4.firebasestorage.app"
+                    storageBucket: "iuwe-v2-d06c4.firebasestorage.app",
+                    messagingSenderId: "1000690486655",
+                    appId: "1:1000690486655:web:2b35e994cc617fa2359e4a",
+                    measurementId: "G-584HX6Q4WS"
                 };
             try {
                 const runtimeKey = (localStorage.getItem(FIREBASE_RUNTIME_APIKEY_STORAGE) || '').trim();
@@ -7917,8 +7924,11 @@
         function updateAuthGateConfigBanner() {
             const statusTxt = document.getElementById('auth-gate-status-text');
             if (!statusTxt) return;
-            if (isFirebaseApiKeyConfigured()) {
-                statusTxt.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>Firebase Auth conectado (iuwe-v2-d06c4)';
+            const sdkLoaded = (typeof window.firebase !== 'undefined' && typeof window.firebase.auth === 'function');
+            if (sdkLoaded && isFirebaseApiKeyConfigured()) {
+                statusTxt.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>SDK Firebase Auth Ativo (' + escapeHtml(window.location.host || 'local') + ')';
+            } else if (!sdkLoaded) {
+                statusTxt.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1"></i>Carregando SDK do Firebase Auth...';
             } else {
                 statusTxt.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>Falta preencher <code>firebase-config.js</code> (API Key)';
             }
@@ -7995,6 +8005,9 @@
             } catch (e) {}
 
             applyGmailAuthStateToPage();
+            if (typeof window.refreshFeedFromCloudDb === 'function') {
+                window.refreshFeedFromCloudDb(true);
+            }
             if (typeof showToast === 'function') {
                 showToast('Autenticado pelo Google! Sua conta está protegida e vinculada ao ID ' + boundHandle, 'success');
             }
@@ -8045,12 +8058,13 @@
                 }
             } catch (err) {
                 const code = String(err && err.code ? err.code : '');
+                const rawMsg = String(err && err.message ? err.message : '');
                 if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
-                    showErr('O navegador ou iframe bloqueou a janela pop-up. Clique em <b>"Abrir via Redirecionamento ➔"</b> abaixo ou abra o site diretamente no GitHub Pages (<code>ceoiuwe.github.io/iuwe-v2</code>).');
+                    showErr('Janela pop-up bloqueada ou arquivo aberto via <code>file://</code>. Abra pelo Live Server em <code>http://localhost:5500</code> ou clique em <b>"Abrir via Redirecionamento ➔"</b> abaixo.');
                 } else if (code === 'auth/unauthorized-domain') {
-                    showErr('Domínio ainda não autorizado no Firebase! No Console do Firebase, vá em <b>Authentication ➔ Settings ➔ Authorized domains</b> e adicione <code>ceoiuwe.github.io</code>.');
+                    showErr('Domínio <code>' + escapeHtml(window.location.hostname) + '</code> ainda não autorizado! No Firebase Console, vá em <b>Authentication ➔ Settings ➔ Authorized domains</b> e adicione <code>' + escapeHtml(window.location.hostname) + '</code>.');
                 } else {
-                    showErr('Falha na autenticação Google OAuth (' + (code || 'erro') + '). Verifique se o provedor "Google" está ativado em Authentication ➔ Sign-in method no Firebase Console.');
+                    showErr('Detalhe do Firebase (' + escapeHtml(code || 'erro') + '): ' + escapeHtml(rawMsg) + '<br><span class="text-[10px] font-normal">Se você restringiu a API Key no Google Cloud Console, confirme que <b>Identity Toolkit API</b> e <b>Token Service API</b> estão marcadas e que <code>' + escapeHtml(window.location.origin) + '/*</code> e <code>https://iuwe-v2-d06c4.firebaseapp.com/*</code> estão liberados em Websites.</span>');
                 }
             } finally {
                 if (btn) {

@@ -10,14 +10,18 @@
 // ============================================================================
 
 window.IUWE_FIREBASE_CONFIG = {
-    apiKey: "COLE_AQUI_SUA_API_KEY_DO_FIREBASE",
+    apiKey: "AIzaSyB8yKKt2BzdMPfpNYttbABUvE40X05vqhc",
     authDomain: "iuwe-v2-d06c4.firebaseapp.com",
     databaseURL: "https://iuwe-v2-d06c4-default-rtdb.firebaseio.com",
     projectId: "iuwe-v2-d06c4",
     storageBucket: "iuwe-v2-d06c4.firebasestorage.app",
-    messagingSenderId: "COLE_AQUI_SEU_MESSAGING_SENDER_ID",
-    appId: "COLE_AQUI_SEU_APP_ID"
+    messagingSenderId: "1000690486655",
+    appId: "1:1000690486655:web:2b35e994cc617fa2359e4a",
+    measurementId: "G-584HX6Q4WS"
 };
 
 // Quando true, exige obrigatoriamente o Pop-up Oficial do Google OAuth (impede simulação local)
 window.IUWE_ENFORCE_STRICT_GOOGLE_OAUTH = true;
+
+// URL do Porteiro Google Apps Script (se você gerou uma nova URL ao implantar, troque apenas aqui):
+window.IUWE_GAS_DOORKEEPER_URL = "https://script.google.com/macros/s/AKfycbxbWXGA2dMJB4y_etqm1aNIwarTYmRs2o5jgnk2sbCphrXCyUprQoIze30NvRRSAkKT/exec";
