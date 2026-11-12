@@ -85,7 +85,6 @@ Plataforma colaborativa de aprendizagem e prática de idiomas (`pt-BR`, `en-CA`,
 
 ## 🔒 4. Licença e Direitos Autorais (`LICENSE`)
 
-Crie um arquivo chamado exatamente **`LICENSE`** na raiz do seu repositório GitHub com o seguinte texto:
 
 ```text
 Copyright (c) 2026 IUWE Platform. Todos os direitos reservados.
