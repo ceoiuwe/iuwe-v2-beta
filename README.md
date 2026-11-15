@@ -1,96 +1,66 @@
-# 🌐 IUWE v2.0 — Comunidade Bilíngue & Estúdio Interativo (9 Páginas Integradas)
+# 🎧 IUWE v2.0 — I learn, yoU learn, We learn
 
-> **Descrição curta para o GitHub (338 caracteres):**
-> `IUWE v2.0 (I learn, yoU learn, We learn): Plataforma gratuita e colaborativa de prática de idiomas (4 formatos: Audiocast, Flashcard 3D, Livreto e Vocabulário IA) com Dual Audio (Modo Free/Gemini 24kHz), pacotes offline (.html/.wav), Login Google obrigatório, segurança LGPD e ODS da ONU.`
+**Plataforma Participativa e Gratuita de Prática de Idiomas com Vozes Naturais (IA), Flashcards 3D, Livretos Ilustrados e Vocabulário Contextual**
 
-Plataforma colaborativa de aprendizagem e prática de idiomas (`pt-BR`, `en-CA`, `fr-CA`, `en-US`, `es-419` e mais) sob o lema **"Construa Online, Pratique Offline"**, gerando materiais interativos autônomos (`.html` 3D offline, `.wav` 24kHz e `.png`) com foco em **gratuidade, privacidade LGPD, simplicidade, autenticação obrigatória via Google (Gmail) e compartilhamento em primeiro lugar**.
+🔗 **Acesso Oficial (Beta Aberto):** [https://ceoiuwe.github.io/iuwe-v2/](https://www.google.com/search?q=https://ceoiuwe.github.io/iuwe-v2/)
 
----
+📦 **Repositório Oficial:** <https://github.com/ceoiuwe/iuwe-v2>
 
-## 🎯 1. As 4 Premissas Inegociáveis da Arquitetura IUWE
+## 🌍 Propósito e Filosofia (IUWE v2.0)
 
-1. **100% Gratuito (`Ser Gratuito`)**
-* **Tradução Cultural Custo Zero**: Tradução instantânea via endpoint público GTX com preservação integral do sentido e bloqueio de abreviações informais (`"svp"`, `"stp"`, `"vc"`), poupando 100% da cota de texto do usuário.
-* **Motor de Voz Híbrido (`Dual Audio`)**: Opera em **Modo Free de Áudio** (síntese acústica PCM 24kHz limpa + Web Speech API, sem necessidade de chave API) ou em **Modo Gemini 24kHz Neural** (quando o usuário insere sua chave gratuita do Google AI Studio em RAM). Em caso de esgotamento da cota diária (`HTTP 429`), o fallback para o Modo Free é automático.
+A **IUWE (*I learn, yoU learn, We learn*)** nasceu da jornada autodidata de aprender idiomas ao longo de anos e da convicção de que qualquer pessoa deve ter acesso gratuito a ferramentas de pronúncia, escuta ativa e memorização — como complemento prático às aulas formais, escolas de idiomas e professores particulares.
 
+Na versão **v2.0**, a plataforma opera no modelo **Estúdio Aberto + Sincronização Híbrida Sob Demanda**:
 
-2. **Privacidade e Segurança em 1º Lugar (`LGPD` + Login Obrigatório Gmail)**
-* **Autenticação Obrigatória via Google (Gmail)**: Acesso restrito e validado via Firebase Authentication, vinculando de forma determinística o `uid` da conta Google ao seu **ID numérico anônimo de 8 dígitos**.
-* **Zero Exposição de E-mail**: Nenhum endereço de e-mail é armazenado ou exibido nos cards públicos; a identidade social utiliza exclusivamente o ID numérico e o `@usuario` anônimo.
-* **Cofre de Chave API em Memória Volátil (`AES-256-GCM`)**: A chave Gemini do usuário nunca é enviada ao banco de dados nem gravada em texto puro no navegador.
-* **Ciclo de Vida e Custódia LGPD (Lei 13.709/2018)**: Remoções por arbitragem ou proteção de dados utilizam arquivamento auditável (`ARCHIVED_LGPD`) no Firebase RTDB sem destruição de evidência de integridade (`SHA-256`), respeitando o limite de lixeira de 30 dias corridos para opções de restauração pelo próprio autor.
+* **Uso Imediato sem Bloqueio Inicial:** Qualquer visitante pode explorar o **Feed Público**, ouvir materiais da comunidade e criar conteúdos imediatamente nas 4 ferramentas sem precisar preencher cadastro prévio.
 
+* **Sincronização na Nuvem Sob Demanda (Google OAuth 2.0):** Ao clicar em **Salvar**, abrir o histórico **Pessoal** / **Salvos** ou sincronizar dispositivos, o usuário pode vincular sua Conta Google (ou sua Chave Criptográfica Portátil de 128 bits) mantendo seu **ID anônimo de 8 dígitos (`@12345678`)** no Feed.
 
-3. **Simples, mas Eficiente**
-* **100% Firebase RTDB**: Todos os dados relacionais e o log imutável de auditoria residem no Firebase Realtime Database.
-* **Filtros Combinados de Múltipla Escolha**: Busca instantânea combinando múltiplos valores em dimensões flexíveis (`Formato`, `@Autor`, `#Tag`, `Idioma` e `Nível CEFR`).
+## 🛠️ Os 4 Formatos Interativos do Estúdio (v2.0)
 
+| Ferramenta | Descrição Prática | Recursos Offline & Exportação | 
+| ----- | ----- | ----- | 
+| **1. Audiocast (`🎙️`)** | Diálogos e trilhas de repetição espaçada com alternância de vozes, velocidades (`0.5x` a `2.0x`) e pausas inteligentes para *shadowing*. | Exportação em `.WAV` unificado (44.1 kHz) ou `.HTML` interativo offline. | 
+| **2. Flashcard 3D (`🃏`)** | Cartões com giro tridimensional (Frente + até 3 idiomas simultâneos no Verso), dicas de contexto e áudio independente por idioma. | Exportação em `.HTML` interativo 3D com áudio embutido ou imagem `.PNG`. | 
+| **3. Livreto Ilustrado (`📖`)** | Sequência de até 5 cenas visuais (16:9) com diálogo trilíngue sincronizado, modo *Slideshow* e ocultação de texto para treino de *listening*. | Exportação do livreto completo em `.HTML` standalone offline. | 
+| **4. Vocabulário IA (`🧠`)** | Geração automática de listas temáticas de termos e frases aplicadas em até 3 idiomas com exercício de ditado interativo (*Dictation Check*). | Exportação do caderno interativo com áudio e ditado em `.HTML` offline. | 
 
-4. **Compartilhar em Primeiro Lugar & Impacto ONU (ODS 4, 8, 9 e 10)**
-* Cada postagem gera um pacote `.html` 3D autônomo que funciona offline em qualquer navegador ou celular, além de áudio `.wav` 24kHz, imagem `.png` e exportação do **Relatório de Impacto de Criador** (contagem de seguidores e downloads), contribuindo diretamente para os Objetivos de Desenvolvimento Sustentável **ODS 4 (Educação)**, **ODS 8 (Trabalho)**, **ODS 9 (Inovação)** e **ODS 10 (Redução das Desigualdades)**.
+## 🏗️ Arquitetura Modular v2.0 (Opção A — Motor Centralizado)
 
+Toda a plataforma **IUWE v2.0** é composta por **10 páginas leves** que compartilham um único motor JavaScript centralizado (`iuwe-core.js`), garantindo manutenção simples e carregamento rápido no GitHub Pages:
 
+| Arquivo | Função na Plataforma v2.0 | 
+| ----- | ----- | 
+| `iuwe-core.js` | **Motor Centralizado Compartilhado (v2.0):** Contém toda a lógica de áudio Dual (Web Speech API Gratuita + Gemini 24kHz TTS), renderização do Feed, filtros multi-seleção, métricas deduplicadas, autenticação Google OAuth e criptografia RSA-OAEP 2048-bit. | 
+| `firebase-config.js` | Configuração pública de conexão com o projeto Firebase (`iuwe-v2-d06c4`) para autenticação OAuth 2.0 e banco em tempo real. | 
+| `index.html` | **Feed Público:** Vitrine comunitária com busca multi-filtro por idioma nativo, idioma-alvo, ferramenta, voz e tags. | 
+| `pessoal.html` | **Feed Pessoal & KPIs:** Acervo das criações do próprio usuário e painel de métricas de impacto (Visualizações, Downloads e Seguidores). | 
+| `criar.html` | **Estúdio de Criação:** Acesso direto aos 4 módulos de autoria com controle de cotas diárias leves. | 
+| `salvos.html` | **Biblioteca de Salvos:** Materiais favoritados pelo usuário para revisão rápida no celular ou computador. | 
+| `perfil.html` | **Configurações & Privacidade (LGPD):** Gestão do ID de 8 dígitos, idiomas preferidos, tags seguidas/bloqueadas e cofre de chave Gemini API em RAM. | 
+| `contatos.html` | **Rede & Comunidade:** Descoberta de criadores e tags seguidas. | 
+| `sobre.html` | **Sobre a IUWE:** História do projeto, missão educacional e identidade visual. | 
+| `Fato_Curioso.html` | **Fatos & Neurociência:** Curiosidades sobre aquisição de idiomas e memória auditiva. | 
+| `metas-onu.html` | **Metas da ONU (ODS 4, 8, 9 e 10):** Alinhamento de impacto social e educação aberta até 2030. | 
+| `guia.html` | **Guia de Uso & Segurança:** Passo a passo para estudantes, boas práticas de chave de API e arquitetura de privacidade. | 
+| `REGRAS_FIREBASE_RTDB.json` | Regras de segurança do Firebase Realtime Database para proteção de autoria e isolamento criptográfico. | 
 
----
+## 🔐 Segurança, Privacidade (LGPD) e Zero-Knowledge
 
-## 🗂️ 2. As 9 Páginas do Repositório (5 Guias Principais + 4 Páginas Institucionais/Guia/Perfil)
+1. **Anonimato Público no Feed (`@12345678`):** Nenhum nome real, foto pessoal ou endereço de e-mail é exibido nos cards públicos da comunidade.
 
-### A. As 5 Guias Principais da Plataforma
+2. **Criptografia Assimétrica RSA-OAEP 2048-bit + Blind Index SHA-256:** Quando o usuário opta por conectar sua Conta Google para sincronizar seu histórico na nuvem, a verificação de identidade no nó `/kyc_verified_users` utiliza exclusivamente hash cego irreversível (`SHA-256`) e pacote cifrado com chave pública `RSA-OAEP-256` (zero e-mail em texto limpo no banco de dados).
 
-| Arquivo | Guia na Plataforma | Função Principal |
-| --- | --- | --- |
-| `index.html` | **1. Público** | Feed público cronológico com alternância entre `🌍 Todos os Posts Públicos` e `⭐ De Autores & #Tags que Sigo`, filtros avançados e clique em `#tag` para seguir. |
-| `pessoal.html` | **2. Pessoal** | Exibe `👤 Meus Posts Publicados` do autor logado, gerenciamento de exclusão (com alerta de lixeira de 30 dias) e o botão de exportação do **Relatório de Criador**. |
-| `criar.html` | **3. Criar Novo** | Estúdio com os 4 formatos interativos: **Audiocast**, **Flashcard 3D**, **Livreto Ilustrado (Slide Book)** e **Vocabulário IA & Ditado**. |
-| `salvos.html` | **4. Salvos** | Biblioteca pessoal pesquisável com todos os posts guardados pelo usuário (`🔖 Salvar`). |
-| `perfil.html` | **5. Perfil/Tags** | Configurações de `@usuario`, idiomas de estudo, painel de seguidores/downloads e gestão de `#tags` e `@autores` seguidos. |
+3. **Cofre de Chave de API em Memória Volátil (BYOK):** O usuário pode usar o **Modo Voz Gratuita do Navegador** sem nenhuma chave, ou conectar sua própria chave gratuita do Google AI Studio cifrada em memória RAM (`AES-256-GCM`) apenas durante a sessão ativa.
 
-### B. As 4 Páginas Institucionais, Impacto ONU e Utilitárias
+4. **Métricas Anti-Fraude Deduplicadas por Aparelho:** Contadores de visualizações e downloads exigem interação humana real (dar play no áudio, girar o flashcard 3D ou avançar páginas) e contabilizam no máximo 1 evento único por dispositivo/post.
 
-| Arquivo | Página | Conteúdo da Versão v2.0 |
-| --- | --- | --- |
-| `sobre.html` | **Sobre a IUWE** | História dos 20 anos de aprendizado autodidata, missão *"Construa Online, Pratique Offline"* e apresentação dos formatos interativos. |
-| `metas-onu.html` | **Metas da ONU (ODS)** | Alinhamento prático com a Agenda 2030 nas metas **ODS 4**, **ODS 8**, **ODS 9** e **ODS 10**. |
-| `guia.html` | **Guia de Uso & Segurança** | Manual das guias, instruções de uso do Dual Audio e diretrizes de segurança da conta. |
-| `contatos.html` | **Redirecionamento / Suporte** | Página interna de suporte e transição estrutural da comunidade. |
+## 🎯 Alinhamento com os Objetivos de Desenvolvimento Sustentável (ONU 2030)
 
----
+* **ODS 4 (Educação de Qualidade):** Democratização do treino diário de conversação e compreensão auditiva sem barreiras financeiras.
 
-## 📁 3. Estrutura Completa de Arquivos do Pacote
+* **ODS 8 (Trabalho Decente e Crescimento Econômico):** Capacitação linguística prática para ampliar oportunidades profissionais globais.
 
-```text
-├── index.html                    # Guia 1: Feed Público (Todos + Seguindo + Login Google)
-├── pessoal.html                  # Guia 2: Feed Pessoal (Meus Posts + Lixeira 30 Dias + Relatório)
-├── criar.html                    # Guia 3: Estúdio de Criação (4 Ferramentas + Dual Audio)
-├── salvos.html                   # Guia 4: Biblioteca Pessoal de Posts Salvos
-├── perfil.html                   # Guia 5: Perfil, Métricas de Criador & Gestão de #Tags
-├── sobre.html                    # Institucional: História, Missão Offline e Ferramentas
-├── metas-onu.html                # Impacto Social: Agenda 2030 da ONU (ODS 4, 8, 9 e 10)
-├── guia.html                     # Manual: Autenticação, Dual Audio & Termos
-├── contatos.html                 # Utilitário de Suporte e Redirecionamento
-├── database.rules.json           # Regras de Segurança e Validação do Firebase RTDB (Auth Required)
-├── backend-appscript/
-│   └── Code.gs                   # Código do Porteiro Doorkeeper (Google Apps Script)
-├── .github/
-│   └── copilot-instructions.md   # Diretrizes automáticas para o GitHub Copilot
-├── .vscode/
-│   └── settings.json             # Travas de segurança do workspace para o VS Code
-├── iuwe_blueprint_v2.html          # Guia Mestre Interativo da Arquitetura IUWE v2.0
-├── LICENSE                       # Licença Proprietária (Todos os Direitos Reservados)
-└── README.md                     # Documentação Oficial do Repositório
+* **ODS 9 (Indústria, Inovação e Infraestrutura):** Arquitetura web leve, *offline-first* e acessível em conexões móveis limitadas.
 
-```
-
----
-
-## 🔒 4. Licença e Direitos Autorais (`LICENSE`)
-
-
-```text
-Copyright (c) 2026 IUWE Platform. Todos os direitos reservados.
-
-Nenhuma parte deste código-fonte, arquitetura visual ou scripts de automação pode 
-ser copiada, modificada, redistribuída ou utilizada comercialmente sem autorização 
-prévia e expressa por escrito do autor.
-
-```
+* **ODS 10 (Redução das Desigualdades):** Acesso aberto a ferramentas de Inteligência Artificial generativa e síntese vocal neural.

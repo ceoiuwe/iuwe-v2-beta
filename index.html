@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>IUWE • Comunidade & Estúdio de Idiomas</title>
+    <link rel="icon" type="image/jpeg" href="IUWE-favicon.jpeg">
+    <link rel="apple-touch-icon" href="IUWE-favicon.jpeg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                    colors: {
+                        iuwe: {
+                            blue: '#42A5FF',         // Light Blue Oficial (Fontes Pequenas, Subtítulos, Tags)
+                            teal: '#6DDDD0',         // Menta Oficial do Clipe
+                            pink: '#FFD4D4',         // Rosa Suave Oficial do Clipe
+                            sky: '#3CB9EF',          // Light Blue Céu
+                            ice: '#AEDDFF',          // Light Blue Gelo
+                            purple: '#FFF1FF',       // Light Purple (Canvas Principal)
+                            purpleMid: '#F8DCFF',    // Light Purple Médio
+                            purpleBorder: '#E9BFF8', // Borda Light Purple
+                            purpleTitle: '#A855F7',  // Light/Medium Purple (Fontes Grandes & Frases Chamativas)
+                            peach: '#FFE4CE'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #FFF1FF;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+        .iuwe-card {
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid #E9BFF8;
+        }
+        .perspective-1000 {
+            perspective: 1200px;
+        }
+        .flip-card-inner {
+            display: grid;
+            grid-template-columns: 100%;
+            width: 100%;
+            min-height: 220px;
+            transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flip-card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flip-card-face {
+            grid-area: 1 / 1 / 2 / 2;
+            width: 100%;
+            min-height: 220px;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1rem;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+        .slide-stage {
+            background: linear-gradient(135deg, #2e1065 0%, #4c1d95 55%, #581c87 100%);
+            border: 2px solid #C084FC;
+            border-radius: 1.25rem;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .vocab-stage {
+            background: linear-gradient(135deg, #2e1065 0%, #3b0764 55%, #0c4a6e 100%);
+            border: 2px solid #7DD3FC;
+            border-radius: 1.25rem;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .slide-book-stage {
+            background: linear-gradient(135deg, #2e1065 0%, #4c1d95 55%, #581c87 100%);
+            border: 2px solid #C084FC;
+            border-radius: 1.25rem;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .flashcard-perspective {
+            perspective: 1200px;
+        }
+        .flashcard-inner {
+            display: grid;
+            grid-template-columns: 100%;
+            width: 100%;
+            min-height: 190px;
+            transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .flashcard-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            grid-area: 1 / 1 / 2 / 2;
+            width: 100%;
+            min-height: 190px;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 1rem;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .flashcard-front {
+            background: linear-gradient(135deg, #ffffff 0%, #faf5ff 60%, #f0f9ff 100%);
+            border: 2px solid #A855F7;
+        }
+        .flashcard-back {
+            background: linear-gradient(135deg, #f3e8ff 0%, #faf5ff 60%, #e0f2fe 100%);
+            border: 2px solid #6B21A8;
+            transform: rotateY(180deg);
+        }
+    
+        /* Otimização Mobile Retrato (Vertical < 640px) mantendo as 4 abas no topo */
+        @media (max-width: 639px) {
+            body {
+                overflow-x: hidden;
+            }
+            header.iuwe-card {
+                padding: 0.5rem 0.6rem !important;
+                gap: 0.35rem !important;
+            }
+            header.iuwe-card > * + * {
+                margin-top: 0.4rem !important;
+            }
+            .logo-frame-box {
+                height: 2.15rem !important;
+                padding: 0.15rem 0.45rem !important;
+            }
+            #main-top-nav-tabs button {
+                padding: 0.42rem 0.25rem !important;
+                font-size: 10px !important;
+                gap: 0.22rem !important;
+            }
+            .iuwe-card {
+                padding: 0.75rem !important;
+            }
+        }
+
+    </style>
+        <style id="iuwe-contrast-and-darkmode-style">
+        /* =====================================================================
+           REGRA DE CONTRASTE IUWE:
+           - Light Purple (#A855F7) e Light Blue (#42A5FF) APENAS em Cabeçalhos,
+             Títulos (h1-h4, .iuwe-title) e Subtítulos (.iuwe-subtitle).
+           - Todo o resto do texto (parágrafos, listas, negritos inline, inputs,
+             descrições) em PRETO BÁSICO (#111827) no Light Mode e BRANCO (#F8FAFC)
+             no Dark Mode para leitura limpa e alto contraste.
+           ===================================================================== */
+        body {
+            color: #111827 !important;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        p, li, td, th, label, input, select, textarea, blockquote {
+            color: #111827;
+        }
+        p strong, p b, li strong, li b, td strong, blockquote strong {
+            color: #000000 !important;
+            font-weight: 700;
+        }
+
+        /* =====================================================================
+           DARK MODE COMPLETO E TRANSLÚCIDO (html.dark-mode)
+           - Captura todas as variações de opacidade (/30, /40, /50, /70, /80, etc.)
+           ===================================================================== */
+        html.dark-mode,
+        html.dark-mode body {
+            background-color: #09090E !important;
+            background-image:
+                radial-gradient(at 10% 10%, rgba(107, 33, 168, 0.20) 0px, transparent 50%),
+                radial-gradient(at 90% 85%, rgba(56, 189, 248, 0.10) 0px, transparent 50%) !important;
+            color: #F8FAFC !important;
+        }
+        html.dark-mode .iuwe-card,
+        html.dark-mode [class*="bg-white"] {
+            background-color: #12121B !important;
+            border-color: rgba(192, 132, 252, 0.24) !important;
+            color: #F8FAFC !important;
+            box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.65) !important;
+        }
+        /* Caixas internas e sub-barras ficam translúcidas no modo escuro para zero dissonância */
+        html.dark-mode [class*="bg-iuwe-purple"],
+        html.dark-mode [class*="bg-purple-50"],
+        html.dark-mode [class*="bg-purple-100"],
+        html.dark-mode [class*="bg-purple-200"],
+        html.dark-mode [class*="bg-sky-50"],
+        html.dark-mode [class*="bg-sky-100"],
+        html.dark-mode [class*="bg-iuwe-ice"],
+        html.dark-mode [class*="bg-iuwe-peach"],
+        html.dark-mode [class*="bg-rose-50"],
+        html.dark-mode [class*="bg-amber-50"],
+        html.dark-mode [class*="bg-emerald-50"],
+        html.dark-mode [class*="bg-slate-50"],
+        html.dark-mode [class*="bg-slate-100"] {
+            background-color: rgba(255, 255, 255, 0.04) !important;
+            border-color: rgba(192, 132, 252, 0.22) !important;
+            color: #F8FAFC !important;
+        }
+        html.dark-mode #header-more-dropdown,
+        html.dark-mode .multi-filter-dropdown > div {
+            background-color: #161622 !important;
+            border-color: rgba(192, 132, 252, 0.35) !important;
+        }
+        html.dark-mode .flashcard-front,
+        html.dark-mode .flashcard-back {
+            background: linear-gradient(135deg, #181826 0%, #1f1934 60%, #152238 100%) !important;
+            color: #F8FAFC !important;
+        }
+        html.dark-mode [class*="text-rose-"],
+        html.dark-mode [class*="text-red-"] {
+            color: #F8FAFC !important;
+        }
+        html.dark-mode p,
+        html.dark-mode li,
+        html.dark-mode [class*="text-slate-"] {
+            color: #E2E8F0 !important;
+        }
+        html.dark-mode p strong,
+        html.dark-mode p b,
+        html.dark-mode li strong,
+        html.dark-mode li b,
+        html.dark-mode blockquote strong {
+            color: #FFFFFF !important;
+        }
+        /* Títulos e Subtítulos no Dark Mode permanecem Light Purple e Light Blue luminosos */
+        html.dark-mode h1,
+        html.dark-mode h2,
+        html.dark-mode h3,
+        html.dark-mode .text-purple-500,
+        html.dark-mode .text-purple-600,
+        html.dark-mode .text-purple-700 {
+            color: #C084FC !important;
+        }
+        html.dark-mode .text-iuwe-blue,
+        html.dark-mode .text-sky-500,
+        html.dark-mode .text-sky-900 {
+            color: #38BDF8 !important;
+        }
+        html.dark-mode input,
+        html.dark-mode select,
+        html.dark-mode textarea {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border-color: rgba(192, 132, 252, 0.28) !important;
+            color: #FFFFFF !important;
+        }
+        html.dark-mode #btn-toggle-free-audio,
+        html.dark-mode #btn-toggle-free-audio span,
+        html.dark-mode #btn-toggle-free-audio i {
+            color: #FFFFFF !important;
+        }
+        /* =====================================================================
+           CAIXAS SELECIONADAS (ABAS, SUB-ABAS, FERRAMENTAS E PÍLULAS ATIVAS)
+           - .iuwe-selected-blue: Fundo Light Blue (#42A5FF) com letras em White (#FFFFFF)
+           - .iuwe-selected-white: No Dark Mode, Fundo White (#FFFFFF) com letras em
+             Light Purple (#9333EA) ou Light Blue (#0284C7) para alto destaque!
+           ===================================================================== */
+        .iuwe-selected-blue,
+        html.dark-mode .iuwe-selected-blue {
+            background-color: #42A5FF !important;
+            border-color: #7DD3FC !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 14px -2px rgba(66, 165, 255, 0.45) !important;
+        }
+        .iuwe-selected-blue span,
+        .iuwe-selected-blue i,
+        .iuwe-selected-blue div,
+        html.dark-mode .iuwe-selected-blue span,
+        html.dark-mode .iuwe-selected-blue i,
+        html.dark-mode .iuwe-selected-blue div {
+            color: #FFFFFF !important;
+        }
+
+        .iuwe-selected-white {
+            background-color: #A855F7 !important;
+            border-color: #9333EA !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 3px 10px -2px rgba(168, 85, 247, 0.35) !important;
+        }
+        .iuwe-selected-white span,
+        .iuwe-selected-white i {
+            color: #FFFFFF !important;
+        }
+        html.dark-mode .iuwe-selected-white {
+            background-color: #FFFFFF !important;
+            border-color: #E9BFF8 !important;
+            color: #9333EA !important;
+            box-shadow: 0 4px 14px -2px rgba(255, 255, 255, 0.28) !important;
+        }
+        html.dark-mode .iuwe-selected-white span {
+            color: #0284C7 !important;
+            font-weight: 800 !important;
+        }
+        html.dark-mode .iuwe-selected-white i {
+            color: #9333EA !important;
+        }
+        html.dark-mode .logo-frame-box {
+            background-color: #000000 !important;
+            border-color: rgba(192, 132, 252, 0.30) !important;
+        }
+    </style>
+        <!-- Motor Compartilhado IUWE Core (Opção A) carregado ao final do body -->
+    <!-- SDK Oficial Firebase (App + Authentication OAuth 2.0 Google - Carregamento Único) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body class="font-sans antialiased pb-12">
+
+    <!-- Toast -->
+    <div id="toast-container" class="fixed top-2.5 left-1/2 -translate-x-1/2 z-[110] flex flex-col items-center space-y-1.5 w-[94%] max-w-md pointer-events-none"></div>
+
+    <!-- ======================================================================= -->
+    <!-- MODAL HÍBRIDO DE LOGIN GOOGLE (ACIONADO AO SALVAR, VER HISTÓRICO OU SINCRONIZAR) -->
+    <!-- Nunca trava a plataforma: o usuário pode fechar e continuar no Estúdio Aberto -->
+    <!-- ======================================================================= -->
+    <div id="iuwe-hybrid-auth-modal" class="fixed inset-0 bg-purple-950/75 backdrop-blur-sm z-50 hidden items-center justify-center p-3 overflow-y-auto">
+        <div class="iuwe-card bg-white border-2 border-iuwe-purpleBorder rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 my-auto">
+            <div class="flex items-center justify-between gap-2 border-b border-iuwe-purpleBorder/60 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-9 h-9 rounded-2xl bg-iuwe-purple border border-iuwe-purpleBorder flex items-center justify-center text-purple-600 shadow-2xs">
+                        <i class="fa-brands fa-google text-base"></i>
+                    </span>
+                    <div>
+                        <span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-300 font-extrabold text-[9px] uppercase tracking-wider">☁️ Sincronização na Nuvem &amp; Histórico</span>
+                        <h2 class="text-sm sm:text-base font-extrabold text-slate-900 mt-0.5">Conecte sua Conta Google</h2>
+                    </div>
+                </div>
+                <button type="button" onclick="closeHybridGoogleAuthModal()" class="w-8 h-8 rounded-full bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-700 flex items-center justify-center font-extrabold cursor-pointer" title="Fechar e continuar no modo visitante">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Motivo contextual que abriu o modal (ex: Salvar Post, Histórico Pessoal, Sincronizar Perfil) -->
+            <div id="hybrid-auth-reason-banner" class="bg-sky-50 border border-sky-200 rounded-2xl p-3 text-xs font-bold text-slate-800 flex items-start gap-2">
+                <i class="fa-solid fa-bookmark text-iuwe-blue mt-0.5"></i>
+                <span id="hybrid-auth-reason-text">Para salvar itens na sua biblioteca pessoal e manter o histórico de tudo o que você produz em qualquer dispositivo, conecte sua Conta Google.</span>
+            </div>
+
+            <div class="bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-2xl p-3 space-y-1.5 text-[11px] text-slate-800">
+                <div class="font-extrabold text-purple-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved text-iuwe-blue"></i>
+                    <span>Privacidade Garantida (LGPD) • Seu E-mail Nunca Aparece no Feed</span>
+                </div>
+                <ul class="list-disc pl-4 space-y-1 font-medium text-[10.5px]">
+                    <li><b>Mesmo ID Anônimo no Feed:</b> Publicamente você continua identificado apenas pelo seu código de 8 dígitos (<code id="hybrid-modal-preview-handle" class="font-mono font-extrabold text-iuwe-blue">@00000000</code>).</li>
+                    <li><b>Biblioteca Salva &amp; Histórico Blindado:</b> Seus posts criados, downloads, seguidores e itens salvos ficam vinculados à sua conta Google para abrir no celular ou no PC.</li>
+                </ul>
+            </div>
+
+            <label class="flex items-start gap-2.5 cursor-pointer bg-iuwe-purple/35 border border-iuwe-purpleBorder rounded-xl p-2.5 hover:border-iuwe-blue transition">
+                <input id="hybrid-auth-lgpd-check" type="checkbox" checked class="rounded text-iuwe-blue w-4 h-4 mt-0.5 flex-shrink-0">
+                <span class="text-[10.5px] text-slate-900 leading-relaxed font-semibold">
+                    Concordo com os <b>Termos de Privacidade (LGPD)</b> e autorizo o vínculo da minha Conta Google ao meu ID de 8 dígitos para salvar meu histórico e receber atualizações da IUWE.
+                </span>
+            </label>
+
+            <div id="hybrid-auth-error-msg" class="hidden rounded-xl bg-rose-50 border border-rose-300 px-3 py-2 text-[11px] font-extrabold text-rose-700"></div>
+
+            <div class="space-y-2">
+                <button id="btn-hybrid-google-login" type="button" onclick="signInWithGoogleHybridPopup()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-iuwe-blue to-purple-600 hover:from-sky-500 hover:to-purple-700 text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2.5 cursor-pointer transition">
+                    <i class="fa-brands fa-google text-base"></i>
+                    <span>Entrar com Conta Google (Salvar Meu Histórico)</span>
+                </button>
+
+                <div class="flex items-center justify-between gap-2 pt-1">
+                    <button type="button" onclick="closeHybridGoogleAuthModal()" class="text-[11px] font-extrabold text-slate-500 hover:text-slate-800 underline cursor-pointer">
+                        Continuar usando como visitante sem salvar na nuvem
+                    </button>
+                    <button type="button" onclick="togglePortableKeySubbox()" class="text-[10.5px] font-extrabold text-purple-600 hover:underline cursor-pointer">
+                        🔑 Usar Chave de Código
+                    </button>
+                </div>
+
+                <!-- Subcaixa opcional de Código de Transferência caso o navegador bloqueie pop-ups -->
+                <div id="hybrid-portable-key-subbox" class="hidden rounded-2xl bg-purple-50 border border-purple-200 p-3 space-y-2 text-[10.5px] mt-1">
+                    <div class="font-extrabold text-purple-800">🔑 Código Portátil do ID (Alternativa sem Pop-up)</div>
+                    <div class="flex items-center gap-1.5">
+                        <input id="modal-portable-code-display" type="text" readonly value="IUWE-..." class="w-full bg-white border border-purple-300 rounded-lg px-2 py-1 text-[10px] font-mono font-bold text-slate-800 select-all">
+                        <button type="button" onclick="copyMyPortableAccessCode()" class="px-2.5 py-1 rounded-lg bg-iuwe-blue text-white font-extrabold shrink-0 cursor-pointer">Copiar</button>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <input id="modal-import-portable-code-input" type="text" placeholder="Colar código IUWE-12345678-iuwe_sec_..." class="w-full bg-white border border-purple-300 rounded-lg px-2 py-1 text-[10px] font-mono text-slate-900">
+                        <button type="button" onclick="importPortableAccessCodeFromInput('modal-import-portable-code-input')" class="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-extrabold shrink-0 cursor-pointer">Restaurar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal de Chave de API Gemini (Cofre AES-256-GCM em RAM) -->
+    <div id="api-key-modal" class="fixed inset-0 bg-purple-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white border border-iuwe-purpleBorder rounded-2xl max-w-sm w-full p-4 shadow-xl space-y-3">
+            <div class="flex justify-between items-center border-b border-iuwe-purpleBorder/50 pb-2">
+                <h3 class="text-xs sm:text-sm font-extrabold text-iuwe-blue flex items-center gap-1.5">
+                    <i class="fa-solid fa-key text-iuwe-blue"></i> Chave de API Gemini (RAM)
+                </h3>
+                <button type="button" onclick="toggleApiKeyModal()" class="w-7 h-7 rounded-full bg-iuwe-purple text-purple-700 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+            <div class="space-y-2 text-[11px] text-slate-900">
+                <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-iuwe-purple hover:bg-iuwe-purpleMid text-iuwe-blue font-extrabold rounded-xl border border-iuwe-purpleBorder flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-up-right-from-square text-[10px]"></i> Gerar Chave Gratuita no Google AI Studio
+                </a>
+                <input id="custom-api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Cole sua chave AIzaSy..." class="w-full bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-iuwe-blue">
+                <div id="active-key-masked-box" class="hidden bg-sky-50 border border-sky-200 rounded-xl px-3 py-1.5 flex items-center justify-between text-[11px]">
+                    <span class="font-bold text-purple-500">Ativa: <code id="active-key-masked" class="font-mono">AIza••••</code></span>
+                    <button type="button" onclick="revokeApiKey()" class="font-extrabold text-rose-600 underline">Remover</button>
+                </div>
+            </div>
+            <button type="button" onclick="saveApiKey()" class="w-full bg-gradient-to-r from-iuwe-blue to-iuwe-sky text-white font-extrabold py-2.5 rounded-xl text-xs shadow-sm">
+                Salvar e Ativar Chave
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Google Meet removido (Zero interação entre usuários) -->
+
+    <!-- Modal de Compartilhamento Unificado (Todos os 4 Formatos) -->
+    <div id="share-post-modal" class="fixed inset-0 bg-purple-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white border border-iuwe-purpleBorder rounded-2xl max-w-sm w-full p-4 shadow-xl space-y-3">
+            <div class="flex justify-between items-center border-b border-iuwe-purpleBorder/50 pb-2">
+                <h3 class="text-xs sm:text-sm font-extrabold text-iuwe-blue flex items-center gap-1.5">
+                    <i class="fa-solid fa-share-nodes text-iuwe-blue"></i> Baixar &amp; Compartilhar Conteúdo
+                </h3>
+                <button type="button" onclick="closeSharePostModal()" class="w-7 h-7 rounded-full bg-iuwe-purple text-purple-700 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+            <div class="bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-xl p-2.5 text-[11px] space-y-1">
+                <div class="font-extrabold text-slate-900 break-words leading-snug" id="share-modal-title">"..."</div>
+                <div class="text-[10px] font-mono text-purple-700" id="share-modal-archive-id">ID: ARC-...</div>
+            </div>
+            <div class="space-y-2 text-xs">
+                <button type="button" onclick="downloadInteractiveHtmlFromShare()" class="w-full py-2.5 px-3 bg-gradient-to-r from-purple-800 to-purple-600 hover:from-purple-900 hover:to-purple-700 text-white font-extrabold rounded-xl flex items-center justify-center gap-2 shadow-md">
+                    <i class="fa-solid fa-clapperboard"></i>
+                    <span>Baixar Arquivo Interativo 3D (.html Offline)</span>
+                </button>
+                <button type="button" onclick="downloadPngFromShare()" class="w-full py-2 px-3 bg-purple-600 hover:bg-iuwe-blue text-white font-extrabold rounded-xl flex items-center justify-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-image"></i>
+                    <span>Baixar Prancha Visual (.PNG)</span>
+                </button>
+
+                <button type="button" onclick="sharePostViaWhatsApp()" class="w-full py-2 px-3 bg-iuwe-blue hover:bg-purple-500 text-white font-extrabold rounded-xl flex items-center justify-center gap-2 shadow-sm">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>Enviar pelo WhatsApp</span>
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="sharePostCopyText()" class="py-2 px-2.5 bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-500 font-bold text-[11px] rounded-xl border border-iuwe-purpleBorder flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-copy text-iuwe-blue"></i> Copiar Resumo
+                    </button>
+                    <button type="button" onclick="sharePostViaEmail()" class="py-2 px-2.5 bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-500 font-bold text-[11px] rounded-xl border border-iuwe-purpleBorder flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-envelope text-iuwe-blue"></i> Por E-mail
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pop-up de Alerta de Exclusão (Lixeira de 30 Dias Corridos • Custódia Legal DB) -->
+    <div id="db-inspect-modal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden overflow-y-auto">
+        <div class="bg-white border border-iuwe-purpleBorder rounded-2xl max-w-md w-full p-4 shadow-2xl space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-iuwe-purpleBorder/50 pb-2">
+                <div>
+                    <h3 class="text-xs sm:text-sm font-extrabold text-iuwe-blue flex items-center gap-1.5">
+                        <i class="fa-solid fa-trash-can text-purple-700"></i> Excluir Publicação Pessoal
+                    </h3>
+                    <p class="text-[10px] text-purple-700 font-semibold">Gerenciamento de Publicações • Guia Pessoal</p>
+                </div>
+                <button type="button" onclick="closeDbInspectModal()" class="w-7 h-7 rounded-full bg-iuwe-purple text-purple-700 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <div class="bg-iuwe-purple/60 border border-iuwe-purpleBorder rounded-xl p-2.5 space-y-1">
+                <div class="text-[10px] font-extrabold text-purple-700 uppercase tracking-wider">Publicação Selecionada</div>
+                <div id="delete-modal-post-title" class="text-xs sm:text-sm font-extrabold text-slate-900">Post Interativo IUWE</div>
+            </div>
+
+            <div class="bg-purple-50 border border-purple-300 rounded-xl p-3 space-y-2 text-[11px] text-slate-800">
+                <div class="font-extrabold text-iuwe-blue flex items-center gap-1.5 text-xs">
+                    <i class="fa-solid fa-triangle-exclamation text-purple-700"></i> Aviso Importante • Lixeira de 30 Dias
+                </div>
+                <p class="leading-relaxed font-semibold">
+                    Ao confirmar a exclusão, esta publicação será retirada imediatamente do <b>Feed Público</b> e movida para a sua <b>Lixeira Pessoal</b>.
+                </p>
+                <p class="leading-relaxed font-semibold">
+                    ⚠️ <b>Exclusão Permanente em 30 Dias:</b> Posts excluídos serão <b>permanentemente excluídos da lixeira em 30 dias corridos</b>. Após esse período, a opção de visualizar ou restaurar o post não estará mais disponível para o usuário.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" onclick="closeDbInspectModal()" class="py-2.5 px-3 bg-iuwe-purple hover:bg-iuwe-purpleMid text-slate-900 font-extrabold text-xs rounded-xl border border-iuwe-purpleBorder flex items-center justify-center gap-1.5">
+                    Cancelar
+                </button>
+                <button id="btn-confirm-db-delete" type="button" onclick="deleteRecordByArbitration()" class="py-2.5 px-3 bg-purple-500 hover:bg-purple-600 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-trash-can"></i> Excluir Post
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- CONTAINER PRINCIPAL UNIFICADO (PASSO 5: COMUNIDADE, FEED E 4 ESTÚDIOS)  -->
+    <!-- ======================================================================= -->
+    <div class="max-w-2xl mx-auto px-2.5 sm:px-4 pt-3 space-y-3">
+
+                <!-- CABEÇALHO DA COMUNIDADE E BARRA DE NAVEGAÇÃO (5 GUIAS + MENU TRÊS BARRAS) -->
+        <header class="iuwe-card rounded-2xl p-3 shadow-sm space-y-2.5 sticky top-2 z-30 backdrop-blur-md bg-white/95 w-full">
+            <!-- LINHA 1: LOGO + LEMA À ESQUERDA | @USUARIO + BOTÃO TRÊS BARRAS (MAIS OPÇÕES) À DIREITA (100% DA LARGURA) -->
+            <div class="w-full flex items-center justify-between gap-2">
+                <a href="sobre.html" class="flex items-center min-w-0" title="Sobre a IUWE">
+                    <img src="data:image/webp;base64,UklGRtAOAABXRUJQVlA4IMQOAABQTACdASp8AXAAPpk+m0gloyYhL3HOCMATCWY3JQP0F//5LsZPI+o/vPpcWT/B8JAcvuFzv/6r1WbbHzD/tp6tPov/r+/F+ix0y3909OPUXvNn+O7f+it97zDrkPqej7/yXh3wCHa+9p6gXc39Y+R7Sy/uWzBt6rEf/7p9cohLYsU7V7EZ75gKWjCp6mDC/kEptok9zkMjXdnvmApaMzbKmdhGEtIytdxdpdDYGOy7MQ8mqZ1uQ5cjZqXxFQ9qMNWw7rT8+s09+6ADUSJsN+9DJNMAkc8f6qG+5gv5z4Bbh7JdVmZWKeaF/j7xmsavANWkAXmiCNgfLC8eSGeU8jdZ4eHKnb7UYhkTZTt/5GMfuQnCECcG9hynR8iRIMbKy84ooNDv0gP1qlWy8ry9hwbzbjo0+juhfTZIS31lFPjkJUOTwSFckDXlhKpWC1rhY/q7xW+xin9o4z+kfzEbV25bTJD7AQp4QEaJhNvMKj4yrgzx3/qfOPthBJUM8kW1mPn7IpvMng9dfIq01dvkKtU1DuTSXkCpVUyY7LgwmEC2K9aFvyDjUBO92NAOx5ay17SKOu8MqCs4w5iX0WMtBryo6WddNdTpMyB4EElMMA9bHLgicqgYPGlZBDzAsTgFwTeImkHvmCac6pe9Mk+GUQJF+iYTvnmccE+VEGno0ZORV9ZzGvo6siASAN8l8McndvMVgf4eovBdt8RtWn9L37tObYv9jtppnkih7WbYUkDVTzzG1IP1C6zfrRAj+FiSzcZbUx5NdW8RWdIChR7dwPzF90wMFRujkMDE/J91NjAycIumwgAb9c/VojmgAP7xWP8yyM3QFUCQgzDaema8C2wu4Kuz23WEOTZFAGt2ayG8R757uS6zyJJQPAn+h6SNNKagDBI/U049BGM0bgM5Kiv5XD1+Oghi8VHPHHotQDtFIRk78a2CxhxQV8oxZWpxoPdf7Yj9z7N8IlHflmnMoVRPXlYJMhMz+TNEBm0OY3qQP8qra3Hzh+jUJENlt888qbe8vujArofARlcRWDWqfpwRkAUYhYe8QyO9mbFnwfL1jS1wFZL5mUSHkRMs7hWIvCMsI9alT8GGxU31XUpks+yaQCeklhfmUzukz3UvJ5Q/4V5OlNyJRA1KxgjnF/a0PoRIq6ei7hiTj3waa5Ra8HgoRJ9dvq3s2eTs47DfoPGYJmB2hYaiHn9E51cRr97laeAd0dTapN1Tdlbw9FVDI5TCqF1i9P3ALFxdi12EKNSFyKJBuyu4kkulW3jS2NKoT8PBtr/VEVDZBYQ8Pk8aHXNqMA1lTloB2NocFMy3MHpCgLuOqrJomXmmG/S2/bIA/Y+bmPwIQQ3hbe7fyoHaBSXJVdZQxjtnY2INKb6QTysSFvKd2dBpa3k9YLitQSmMpS3kCBPOGdp1mN/CPHo84791A3ox3kal0om81L/b9/2444o0XC3DgACJNACdScG/VcqxGuZhj763mIToH1lCgUEi/W9B6iNabbi5jSKJ2cm8CB8PyIxl7wFKVBqbtzShAgX+wUtsWUbvR1nh1RURBujRjthfvjm7+Rw7ll/4ABr1JZfADNHFDEa/BvRwOmBQq2g1TJZ4B5hC/XbOMdBcEU3MVYANWkHAXEY5ZUZIjSaBXXTh19tAYHe23/6yd8bgC5MoqVTitCEC7Ovfc/V+kvQ7WfELwUG9ohfSB4A7C/biJU4aH6e9BDf8smU1rW99CK3wGs23uhhfZVxgDDUYp1YyPV4N53KQXhh8pubymQB3y4wggKw5EtFhVgGqkBcPsz/xB6Kjlm0ckf+jIdsIGR5NX4dfDnwYisVDu2hrQNOaG7jg+u6vCn4ehvT7m7HMPYsK3faZC8jvhZLYqtSd3+IUbjqc4iMJgiEUq/yapW31Mbvb2s195b4UkP1iENPbMC9Cqwyu6ZkcYMJbatPKVA2MEeFKDKnAbet7ed2UBg32KTiBqouywo9On1n8yuEqIrmKyk8r9fHvd232WDvWcnYWNiHlp1CVnAnjPGK/EEZRISxDygCLb4B4722dBNq3DiHgbpkUZFhXOJyOJtwEvgT/0lN172iDwAr6w8FQq42UsZLrpPP7WRPRTvOhjOwGtuoepXoJu6moXaEbFSm73XLDk1ONSAz3+yl2NZvMVBBL3qliYA9zX2p+hd7xQveLTWX8DybMjUpOUHbPmA0kCq9Hf444L7bi4ZsZGKC/IdHCOIUK/5AURfckxMtZ3OTzG8gmxGNonXwxDZ+/36p/cvdQn7wE/VkQMxzSpCCJ6OZRFPxNGn2QDYsKUcpiT5hoc2hAzkKxt9hdToCM+hhb3ZoCPcs5x0i3j5QGnanVmGP5/h7c4qP8nU9ZCR2OmkPSzwf/cluAUXfroPuZ7umXjQyde1o8RijX4WrFPFoEc6+B2xbD8Yp+5xRsqf/QSLhsY4ORz/sdKAQD5lEKj5nzfhtytLoG3OS+O0gakeiBQcH6niRP8tpROEI9y5ioF9eV4g7h34ZmtWrI0upjPMHN97/rFm99S4Zh4nnZKFvCnP1mhbQgxiNKDPRF55i8g0vIw7+popdoadIS8bg/79xEYslS4CDQmctlCvXPSqC8W0DUY9qYCiJ0xvZIB73T8+D+4S7pZxfo5WDHFWuY7wxVecwxZ/O0eKhW0D7rW5AHn3qLmuMKvenTFGjpn5jZg2FUpk3fhNGYAQ1aV2GW64tKV3r0+Gy6IvWYp+EOwIQGBYUmAD0UXdygUNEao3ypxX219dW6ntHDx/M+ky8J3UsSDacpytggHCcO0uBK5ctX1fIggnGxFO1yABBhf62mphO5FjZP+ldktPZNCrSbi/d6wT7QUf0XTUaavXdHPgxT7cyer8XDEBd9bjXCgPQ3KXgbeb7A1+C6VWJcUSdqr2M/6g/OLLAvzUQo6TlY6xO+cQlbe5Z47ghjWsC7LfXsazCsgL3hPGKoX4GGFQ8AWGCnuPllWG9ESw79m9ox3mBv2Fh08PvzNB7qUCG+q6w/g8fQUIiuvl8I2D13rV7Eaeq4NXXTnL12MR2BL5Y3E45NOtSYU2LxDc78jUofhxfG7ZEpErtojBFRISgzFukKInDViyXvA+3I6rZB61l7tw+uhO9/8Qi5VH9LVNO5ZyT2EzyvZMD21Qj1sTlVtclSG/ASFIJgI4khxJVziVw5VrNTLWnh77EXQ8Er1299o7BcCqfs1iiW9UEFHnmdgX654QxF3/4EATLgO5fzGZAtGyRwTn0AIDQ1RGBIycf4Qab1fYFxc7JJHO6dFFjuXrWHJVQLjrBidRk29YhXMwkQOq1+9YnTR+UiRPjgdli+yKiNtXI689kf7nA6GFujaOb3H8SLOg4QgpSI724UdGFx3+fHwTHJK4zgRpElT8OrcBwsmgU/UXC6reO9SwNL1b0TFUn3lDX98Eyj1FGm3b/Tugy7+M5qfAkE/aCy4fdRQNSNHXLy/ltgMmI0Xu/7yOANIXhK9eIORqZ/bfcQKG/F7sw9MnoVZ9cvrfTyMc2P8sO1pinM5Bl9i3atuYm1YXRy5i5WlGV3PZ7l9686PoUyeTuM94QsLsdj425jGslLbeaZfmT93UDU2bHW4Zw1U5M2qiLm9UiIkduT3wjtOd6QrQ8ZZHGq7WS9JbgPglFFt3vvoVgBtrJIuq67dihvuvtEp2dj4uIjdyAWezADyWWH+642HAVQvNkBsVCSZ0vNsrnrQX+nCpih9QGoL6aipd0q3LL7UXcu8PbaOtzOogJo1wQbaAaqGEpb55GdXdUtpK+ZJY6tiWNyyl3ae2VwPQoGvh0qEAyAIoD5Kv4U8i9XEobtm5975ZrlDgC59jJy+BZM4SCAGsMMNgpBaOAAVrSDlR0wnnZqk8G97eFNvFHQTr3l5RNoI/rxTishx/RG/1lSArF2fo8+cnmzfTkAJlt3Po9pi8cM3nKdOJbOh1qnAFUW813ewLjFnvSyxUAiin9ndHYZjUC81vF5F3MVkjrrdN+qtJfEVv7DnU6g/kfAL11Vvphbp3ZGJzmfLYzNPotg2BIqSBCxTjIrug9yO8ev0OS+GgsBjZZ1lPQNszn5+aDZrDv/7JVFmUyazGMjnRN32Zob/DbVcKtujm4JjxkrlRsLkXcr3DLbSsUKuqELtdTA0u4ze7MjzoRftiOMpcuPt/e6TYaST4F+eRa0oC1tlfQtiTOIIF6cx1bGpxc6yJM8kts+ZJos2n68w+JMnwLksVYSxXGe86KYpCIX4+sOaqpS6JwwxQiig+omRn6c24fRlPf/Gqhsts5Gx1zroHZTfRQVZrEC1kPU8yaoy4xN7Q9MbnIWvPpmmrQ7PISfDF1oMM7m2cfED5HBgeP3e5cn6fNWMWCvkMXxkdPQbIs/10/4jr7nvx9KPCCHxEN0xxC9txjVAeXCXcpUEODSwLHL+yrA0z0hw00pHRH1/lRjUccbmekNTMVkA1OYeDAYwHSRNH2W4BBEzcSrUAfYzsrHkipXUlvef5tEdlQTgH+Of/6jL2vY+/WgX792tq766tzGCXzotXoXtjTYpIH1FVSeyQa74/HEVn6fHJFjMvCkqpzncfZBc2rOkOz2AarGEsgOoB1DBxsRaCUVIkBLa9SBUugULY9SIELp17H8PShx43+ormnDoy+nje1jnbYyLNB1gH0ZTUC6dmH8sSwS6uD10E3+aWnE3JKcHZWQmp+oAknWIsoLDYj55FX5qungk3ijLH4hxRilIgQKYcjRm8sm1ncABvMxb6sTfV1HYIgjlssKYjsnIREQJ7hrR6P2N0OsFrm8TQfHP8cSdw2nelcGAJ4EqdrBIki9ecXgILZpsCebWos/BlXJNfI3ap5Hd9zsCW2LCY0MzV4PdLNDSJ0/WdZXTVpxJbCry1RLDLCqjONa42hQaXVeeUr04dCPtqGcrg34brtVtpWgVaNlDPvCQNR7DT+AFhOQXOxWiACZS3tq2XyhNw1L/3c282rZxTcbLrXRpPfpsdNtftaQRQj3p5lMxOPnRn8xhGROn/WSvaU23LHB3NESZKM27JeiyNMhPuGkzGAAAAA=" data-iuwe-logo="full" alt="IUWE - I learn, yoU learn, We learn" class="logo-frame-box h-10 sm:h-11 w-auto rounded-xl border border-iuwe-purpleBorder bg-white px-2.5 py-1 shadow-2xs object-contain">
+                </a>
+
+                <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 flex-wrap justify-end">
+                    <!-- Status Híbrido: Visitante Aberto ou Conta Google Verificada -->
+                    <button id="header-hybrid-login-btn" type="button" onclick="openHybridGoogleAuthModal('Conecte sua Conta Google para salvar seus itens favoritos, manter seu histórico de criação na nuvem e sincronizar seu ID de 8 dígitos em qualquer aparelho.')" class="px-2.5 py-1 rounded-xl bg-gradient-to-r from-iuwe-blue to-purple-600 hover:opacity-95 text-white font-extrabold text-[10.5px] flex items-center gap-1.5 shadow-2xs cursor-pointer transition" title="Conectar Conta Google para salvar histórico e biblioteca na nuvem">
+                        <i class="fa-brands fa-google"></i>
+                        <span>Entrar p/ Salvar</span>
+                    </button>
+                    <div id="header-hybrid-verified-badge" class="hidden px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 font-extrabold text-[10.5px] items-center gap-1.5 shadow-2xs" title="Conta Google verificada e sincronizada na nuvem">
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                        <span id="header-hybrid-verified-text" class="font-mono">Google ✓</span>
+                    </div>
+                    <button id="header-hybrid-logout-btn" type="button" onclick="logoutHybridGoogleSession()" class="hidden px-2 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-extrabold text-[10.5px] items-center gap-1 cursor-pointer transition shadow-2xs" title="Desconectar Conta Google e voltar ao modo visitante">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span class="hidden sm:inline">Sair</span>
+                    </button>
+
+                    <button id="btn-refresh-cloud-feed" type="button" onclick="refreshFeedFromCloudDb()" class="px-2.5 py-1 rounded-xl bg-white hover:bg-iuwe-purple text-iuwe-blue border border-iuwe-purpleBorder font-extrabold text-[11px] flex items-center gap-1.5 cursor-pointer transition shadow-2xs" title="Sincronizar e atualizar dados da nuvem (Firebase RTDB)">
+                        <i id="refresh-feed-icon" class="fa-solid fa-rotate text-purple-500"></i>
+                        <span class="hidden sm:inline">Atualizar Nuvem</span>
+                    </button>
+
+                    <button type="button" onclick="switchMainTab('config')" class="px-2.5 py-1 rounded-xl bg-iuwe-purple border border-iuwe-purpleBorder text-iuwe-blue font-extrabold text-[11px] hover:bg-iuwe-purpleMid flex items-center gap-1.5 cursor-pointer transition" title="Clique para abrir Perfil/Tags">
+                        <i class="fa-solid fa-user-circle text-purple-500"></i>
+                        <span id="header-active-handle">@usuario</span>
+                    </button>
+
+                    <!-- Botão "Três Barras" (Mais Opções: Perfil/Tags, Sobre, Metas ONU e Guia de Uso) no canto superior direito -->
+                    <div class="relative" id="header-more-menu-wrapper">
+                        <button id="btn-header-more-menu" type="button" onclick="toggleHeaderMoreMenu(event)" class="w-9 h-9 rounded-xl bg-white hover:bg-iuwe-purple text-slate-900 border border-iuwe-purpleBorder flex items-center justify-center shadow-2xs cursor-pointer transition" title="Mais opções (Perfil/Tags, Sobre, Metas da ONU e Guia de Uso)">
+                            <i class="fa-solid fa-bars text-sm text-purple-500"></i>
+                        </button>
+                        <div id="header-more-dropdown" class="hidden absolute right-0 mt-1.5 w-64 rounded-2xl iuwe-card bg-white border-2 border-iuwe-purpleBorder shadow-xl p-1.5 z-50 space-y-1 text-xs font-extrabold">
+                            <button type="button" onclick="switchMainTab('config'); toggleHeaderMoreMenu(event);" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-iuwe-purple text-slate-900 transition text-left cursor-pointer">
+                                <i class="fa-solid fa-sliders text-purple-500 w-4 text-center"></i>
+                                <span>Perfil &amp; #Tags</span>
+                            </button>
+                            <div class="border-t border-iuwe-purpleBorder/60 my-1"></div>
+                            <a href="sobre.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-iuwe-purple text-slate-900 transition">
+                                <i class="fa-solid fa-compass text-purple-500 w-4 text-center"></i>
+                                <span>Sobre a IUWE</span>
+                            </a>
+                            <a href="Fato_Curioso.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-iuwe-purple text-slate-900 transition">
+                                <i class="fa-solid fa-lightbulb text-iuwe-blue w-4 text-center"></i>
+                                <span>Fato Curioso (Origem do Nome)</span>
+                            </a>
+                            <a href="metas-onu.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-iuwe-purple text-slate-900 transition">
+                                <i class="fa-solid fa-earth-americas text-iuwe-blue w-4 text-center"></i>
+                                <span>Metas da ONU (ODS 4, 8, 9, 10)</span>
+                            </a>
+                            <a href="guia.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-iuwe-purple text-slate-900 transition">
+                                <i class="fa-solid fa-shield-halved text-purple-500 w-4 text-center"></i>
+                                <span>Guia de Uso &amp; Segurança</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LINHA 2: CONTROLES RÁPIDOS PREENCHENDO 100% DA HORIZONTAL (3 COLUNAS IGUAIS) -->
+            <div class="w-full grid grid-cols-3 gap-2">
+                <button type="button" onclick="toggleIuweThemeMode()" class="btn-theme-toggle-ui w-full py-1.5 px-2 bg-white hover:bg-iuwe-purple text-slate-900 text-[10.5px] sm:text-xs font-extrabold rounded-xl border border-iuwe-purpleBorder flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer transition" title="Alternar entre Light Mode e Dark Mode">
+                    <i class="fa-solid fa-moon text-purple-500"></i> <span>Dark Mode</span>
+                </button>
+                <button id="btn-toggle-free-audio" type="button" onclick="toggleFreeAudioEngineMode()" class="w-full py-1.5 px-2 bg-purple-500 text-white text-[10.5px] sm:text-xs font-extrabold rounded-xl border border-iuwe-blue flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer transition" title="Alternar entre Voz Gemini 24kHz (Chave do Usuário) e Modo Free de Áudio (Gratuito / Pós-Cota)">
+                    <i id="free-audio-icon" class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span id="free-audio-label">Áudio: Gemini 24kHz</span>
+                </button>
+                <button id="btn-api-key" type="button" onclick="toggleApiKeyModal()" class="w-full py-1.5 px-2 bg-iuwe-peach/80 hover:bg-iuwe-peach text-slate-900 text-[10.5px] sm:text-xs font-extrabold rounded-xl border border-purple-300 flex items-center justify-center gap-1.5 cursor-pointer transition">
+                    <i id="api-key-icon" class="fa-solid fa-key text-purple-500"></i>
+                    <span id="api-key-text">Chave API</span>
+                </button>
+            </div>
+
+            <!-- LINHA 3: BARRA DE 4 GUIAS PRINCIPAIS NO TOPO (100% HORIZONTAL • OTIMIZADA P/ CELULAR VERTICAL E PC) -->
+            <nav id="main-top-nav-tabs" class="w-full grid grid-cols-4 gap-1 sm:gap-1.5 bg-iuwe-purple/60 p-1 sm:p-1.5 rounded-xl border border-iuwe-purpleBorder">
+                <button id="main-tab-public" type="button" onclick="switchMainTab('public')" class="iuwe-selected-blue w-full py-2 px-1.5 rounded-lg text-[10.5px] sm:text-xs font-extrabold transition flex items-center justify-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-earth-americas"></i>
+                    <span>Público</span>
+                    <span id="badge-count-public" class="px-1.5 py-0.2 rounded-full bg-black/20 text-[9px]">0</span>
+                </button>
+                <button id="main-tab-personal" type="button" onclick="switchMainTab('personal')" class="w-full py-2 px-1.5 rounded-lg text-[10.5px] sm:text-xs font-extrabold transition flex items-center justify-center gap-1 text-slate-900 hover:bg-white/70">
+                    <i class="fa-solid fa-user-check text-purple-500"></i>
+                    <span>Pessoal</span>
+                    <span id="badge-count-personal" class="px-1.5 py-0.2 rounded-full bg-purple-200 text-purple-500 text-[9px]">0</span>
+                </button>
+                <button id="main-tab-create" type="button" onclick="switchMainTab('create')" class="w-full py-2 px-1.5 rounded-lg text-[10.5px] sm:text-xs font-extrabold transition flex items-center justify-center gap-1 text-purple-500 bg-purple-100/90 hover:bg-purple-200 border border-sky-300">
+                    <i class="fa-solid fa-circle-plus text-iuwe-blue"></i>
+                    <span>Criar</span>
+                </button>
+                <button id="main-tab-saved" type="button" onclick="switchMainTab('saved')" class="w-full py-2 px-1.5 rounded-lg text-[10.5px] sm:text-xs font-extrabold transition flex items-center justify-center gap-1 text-slate-900 hover:bg-white/70">
+                    <i class="fa-solid fa-bookmark text-sky-500"></i>
+                    <span>Salvos</span>
+                    <span id="badge-count-saved" class="px-1.5 py-0.2 rounded-full bg-iuwe-blue text-white text-[9px]">0</span>
+                </button>
+            </nav>
+        </header>
+
+        <!-- =================================================================== -->
+        <!-- VISÃO DE FEED (COMPARTILHADA ENTRE GUIA "PÚBLICO" E GUIA "PESSOAL") -->
+        <!-- =================================================================== -->
+        <section id="view-feed-section" class="space-y-3">
+            <!-- Painel de Controle Rápido do Feed -->
+            <div class="iuwe-card rounded-2xl p-3.5 shadow-sm space-y-2.5">
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <h2 id="feed-mode-heading" class="text-sm sm:text-base font-extrabold text-purple-500 flex items-center gap-1.5">
+                            <i class="fa-solid fa-earth-americas text-iuwe-blue"></i>
+                            <span>Feed Público • Todos os Posts em Ordem Cronológica</span>
+                        </h2>
+                        <button type="button" onclick="toggleTabHelpSubtitle('feed-mode-subtitle')" class="w-6 h-6 rounded-full bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center text-xs font-extrabold cursor-pointer transition shrink-0" title="Como funciona esta guia?">
+                            <i class="fa-solid fa-question"></i>
+                        </button>
+                    </div>
+                    <p id="feed-mode-subtitle" class="hidden text-[11px] font-medium text-slate-900 bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-xl px-3 py-2">
+                        Carrega todas as 4 ferramentas (<b>Audiocast</b>, <b>Flashcard 3D</b>, <b>Livreto Ilustrado</b> e <b>Vocabulário IA</b>). Siga <b>#tags</b> ou <b>@autores</b> direto nos cards!
+                    </p>
+                </div>
+
+
+                <!-- Banner de Incentivo ao Login Google nas guias Pessoal e Salvos (visível apenas quando ainda não logado) -->
+                <div id="hybrid-unauth-callout-banner" class="hidden bg-gradient-to-r from-purple-50 via-sky-50 to-purple-50 border-2 border-iuwe-blue/40 rounded-2xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+                    <div class="space-y-0.5 text-xs">
+                        <div class="font-extrabold text-purple-700 flex items-center gap-1.5">
+                            <i class="fa-brands fa-google text-iuwe-blue"></i>
+                            <span>Você está no Modo Visitante Local (<code id="callout-visitor-id" class="font-mono text-iuwe-blue">@00000000</code>)</span>
+                        </div>
+                        <p class="text-[11px] text-slate-700 font-medium leading-snug">
+                            Conecte sua <b>Conta Google</b> para guardar seus itens salvos e todo o seu histórico de produção na nuvem sem risco de perder ao limpar o navegador.
+                        </p>
+                    </div>
+                    <button type="button" onclick="openHybridGoogleAuthModal('Conecte sua Conta Google para vincular seu histórico de criação e seus itens salvos na nuvem.')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-iuwe-blue to-purple-600 hover:opacity-95 text-white font-extrabold text-[11px] flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer">
+                        <i class="fa-brands fa-google"></i>
+                        <span>Conectar Google Agora</span>
+                    </button>
+                </div>
+
+                <!-- Barra de Pesquisa Rápida e Filtros Múltiplos do Feed (100% PT-BR) -->
+                <div class="space-y-2">
+                    <div class="flex items-center gap-1.5">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-magnifying-glass text-purple-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input id="feed-search-input" type="text" oninput="renderUnifiedFeed()" placeholder="Pesquisar por título, frase, #tag, @ID..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl pl-8 pr-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-iuwe-blue">
+                        </div>
+                        <button id="btn-toggle-more-filters" type="button" onclick="toggleExtraFeedFilters()" class="px-2.5 py-1.5 rounded-xl bg-iuwe-purple hover:bg-iuwe-purpleMid text-iuwe-blue border border-iuwe-purpleBorder font-extrabold text-[10.5px] flex items-center gap-1 shrink-0 cursor-pointer">
+                            <i class="fa-solid fa-filter text-purple-500"></i>
+                            <span id="label-extra-filters">Mais Filtros</span>
+                            <i id="chevron-extra-filters" class="fa-solid fa-chevron-down text-[9px] text-iuwe-blue"></i>
+                        </button>
+                    </div>
+                    <div id="extra-feed-filters-panel" class="hidden bg-iuwe-purple/40 border border-iuwe-purpleBorder rounded-xl p-2.5 space-y-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-start text-xs">
+                            <details class="multi-filter-dropdown w-full bg-white border border-iuwe-purpleBorder rounded-xl px-3 py-2 shadow-2xs">
+                                <summary class="font-extrabold text-slate-800 cursor-pointer break-words whitespace-normal leading-snug" id="label-filter-format">📚 Todas as 4 Ferramentas</summary>
+                                <div id="options-filter-format" class="mt-2 pt-1.5 border-t border-iuwe-purpleBorder/40 flex flex-col gap-1 max-h-52 overflow-y-auto"></div>
+                            </details>
+                            <details class="multi-filter-dropdown w-full bg-white border border-iuwe-purpleBorder rounded-xl px-3 py-2 shadow-2xs">
+                                <summary class="font-extrabold text-slate-800 cursor-pointer break-words whitespace-normal leading-snug" id="label-filter-lang">🌐 Todos os Idiomas</summary>
+                                <div id="options-filter-lang" class="mt-2 pt-1.5 border-t border-iuwe-purpleBorder/40 flex flex-col gap-1 max-h-52 overflow-y-auto"></div>
+                            </details>
+                            <details class="multi-filter-dropdown w-full bg-white border border-iuwe-purpleBorder rounded-xl px-3 py-2 shadow-2xs">
+                                <summary class="font-extrabold text-slate-800 cursor-pointer break-words whitespace-normal leading-snug" id="label-filter-level">🎓 Todos os Níveis</summary>
+                                <div id="options-filter-level" class="mt-2 pt-1.5 border-t border-iuwe-purpleBorder/40 flex flex-col gap-1 max-h-52 overflow-y-auto"></div>
+                            </details>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 pt-1 border-t border-iuwe-purpleBorder/50">
+                            <div id="feed-followed-tags-pills" class="flex items-center gap-1 flex-wrap"></div>
+                            <button type="button" onclick="resetFeedFilters()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-iuwe-purple text-purple-700 border border-iuwe-purpleBorder font-extrabold text-[10px] shrink-0 cursor-pointer">
+                                <span>Limpar Filtros</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-seletor exclusivo quando estiver na guia "Feed Público" -->
+                <div id="public-feed-subbar" class="bg-sky-50/80 border border-iuwe-blue/30 rounded-xl p-2">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button id="btn-public-all" type="button" onclick="setPublicFeedFilter('all')" class="iuwe-selected-white px-3 py-1 rounded-lg border font-extrabold text-[10.5px] shadow-2xs">
+                                🌍 Todos os Posts Públicos (<span id="count-public-all">0</span>)
+                            </button>
+                            <button id="btn-public-following" type="button" onclick="setPublicFeedFilter('following')" class="px-3 py-1 rounded-lg bg-white text-purple-500 border border-iuwe-purpleBorder font-extrabold text-[10.5px]">
+                                ⭐ De Autores &amp; #Tags que Sigo (<span id="count-public-following">0</span>)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-seletor e Relatório de Impacto do Criador na guia "Feed Pessoal" -->
+                <div id="personal-feed-subbar" class="hidden bg-purple-50 border border-purple-200 rounded-xl p-2.5 space-y-2.5">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button id="btn-personal-mine" type="button" onclick="setPersonalFeedFilter('mine')" class="iuwe-selected-white px-2.5 py-1 rounded-lg border font-extrabold text-[10.5px] shadow-2xs">
+                                👤 Meus Posts (<span id="count-personal-mine">0</span>)
+                            </button>
+                            <button id="btn-toggle-creator-report" type="button" onclick="toggleCreatorReportDetails()" class="px-2.5 py-1 bg-white hover:bg-iuwe-purple text-iuwe-blue font-extrabold text-[10.5px] rounded-lg border border-iuwe-purpleBorder flex items-center gap-1 shadow-2xs">
+                                <i class="fa-solid fa-chart-Simple text-purple-500"></i> <span>📊 Relatório de Criador</span>
+                            </button>
+                            <button type="button" onclick="exportCreatorImpactReportHtml()" class="px-2.5 py-1 bg-iuwe-blue hover:bg-iuwe-sky text-white font-extrabold text-[10.5px] rounded-lg flex items-center gap-1 shadow-2xs" title="Baixar Relatório Completo de Downloads e Seguidores (.HTML)">
+                                <i class="fa-solid fa-file-arrow-down"></i> <span>Baixar Report</span>
+                            </button>
+                        </div>
+                        <button id="btn-toggle-archived-lgpd" type="button" onclick="toggleShowArchivedRecords()" class="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-500 font-extrabold text-[10.5px] rounded-lg border border-purple-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-trash-can text-purple-700"></i> <span id="toggle-archived-label">Ver Lixeira (30 Dias)</span>
+                        </button>
+                    </div>
+
+                    <!-- Resumo de Métricas do Usuário (ID 8 Dígitos, Seguidores, Posts, Visualizações e Downloads Únicos) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 pt-0.5">
+                        <div class="bg-white/90 border border-iuwe-purpleBorder rounded-xl p-2 flex flex-col justify-between">
+                            <span class="text-[9.5px] font-extrabold text-purple-500 uppercase">Meu ID Único</span>
+                            <div class="flex items-center justify-between gap-1 mt-0.5">
+                                <span id="report-kpi-userid" class="text-xs font-extrabold text-iuwe-blue font-mono">@00000000</span>
+                                <button type="button" onclick="copyMyUniqueUserId()" class="text-[10px] px-1.5 py-0.5 rounded bg-iuwe-purple text-purple-700 font-extrabold" title="Copiar meu ID de 8 dígitos">📋</button>
+                            </div>
+                        </div>
+                        <div class="bg-white/90 border border-iuwe-purpleBorder rounded-xl p-2 flex flex-col justify-between">
+                            <span class="text-[9.5px] font-extrabold text-purple-500 uppercase">Seguidores</span>
+                            <span id="report-kpi-followers" class="text-xs sm:text-sm font-extrabold text-slate-900 mt-0.5">👥 0</span>
+                        </div>
+                        <div class="bg-white/90 border border-iuwe-purpleBorder rounded-xl p-2 flex flex-col justify-between">
+                            <span class="text-[9.5px] font-extrabold text-purple-500 uppercase">Posts Ativos</span>
+                            <span id="report-kpi-posts" class="text-xs sm:text-sm font-extrabold text-slate-900 mt-0.5">📚 0</span>
+                        </div>
+                        <div class="bg-white/90 border border-iuwe-purpleBorder rounded-xl p-2 flex flex-col justify-between">
+                            <span class="text-[9.5px] font-extrabold text-purple-500 uppercase">Visualizações</span>
+                            <span id="report-kpi-views" class="text-xs sm:text-sm font-extrabold text-purple-700 mt-0.5">👁️ 0</span>
+                        </div>
+                        <div class="bg-white/90 border border-iuwe-purpleBorder rounded-xl p-2 flex flex-col justify-between col-span-2 sm:col-span-1">
+                            <span class="text-[9.5px] font-extrabold text-purple-500 uppercase">Downloads Únicos</span>
+                            <span id="report-kpi-downloads" class="text-xs sm:text-sm font-extrabold text-iuwe-blue mt-0.5">📥 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Tabela Detalhada do Report por Conteúdo (Expansível) -->
+                    <div id="creator-report-details-box" class="hidden bg-white/95 border border-iuwe-purpleBorder rounded-xl p-2.5 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap border-b border-iuwe-purpleBorder/50 pb-1.5">
+                            <span class="text-[11px] font-extrabold text-iuwe-blue">📊 Desempenho Detalhado por Material Publicado</span>
+                            <span class="text-[10px] font-bold text-purple-500">Atualizado em tempo real</span>
+                        </div>
+                        <div id="creator-report-rows-container" class="space-y-1.5 max-h-56 overflow-y-auto text-[11px]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LISTA CRONOLÓGICA UNIFICADA DE POSTS -->
+            <div id="unified-feed-container" class="space-y-3"></div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VISÃO 3: CRIAR NOVO (COM AS 4 OPÇÕES DE CONTEÚDO INTEGRADAS)        -->
+        <!-- =================================================================== -->
+        <section id="view-create-section" class="hidden space-y-3">
+            <!-- Seletor das 4 Ferramentas de Criação -->
+            <div class="iuwe-card rounded-2xl p-3.5 shadow-sm space-y-2.5">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <div class="space-y-1 flex-1 min-w-[200px]">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm sm:text-base font-extrabold text-purple-500 flex items-center gap-1.5">
+                                <i class="fa-solid fa-wand-magic-sparkles text-iuwe-blue"></i>
+                                <span>Criar Novo Conteúdo • 4 Ferramentas IUWE</span>
+                            </h2>
+                            <button type="button" onclick="toggleTabHelpSubtitle('create-main-subtitle')" class="w-5 h-5 rounded-full bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center text-[10px] font-extrabold cursor-pointer transition shrink-0" title="Como funciona esta guia?">
+                                <i class="fa-solid fa-question"></i>
+                            </button>
+                        </div>
+                        <p id="create-main-subtitle" class="hidden text-[11px] font-medium text-slate-900 bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-xl px-3 py-1.5">
+                            Tudo o que você publicar aqui vai imediatamente para o topo do <b>Feed Público</b> e do seu <b>Feed Pessoal</b> em ordem cronológica!
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div class="flex items-center gap-1 text-[10px] font-extrabold text-slate-900 bg-white px-2 py-1 rounded-xl border border-iuwe-purpleBorder">
+                            <span>🎓 Nível do Post:</span>
+                            <select id="global-post-level-select" class="bg-transparent font-extrabold text-iuwe-blue focus:outline-none">
+                                <option value="Iniciante (A1-A2)">Iniciante (A1-A2)</option>
+                                <option value="Intermediário (B1-B2)" selected>Intermediário (B1-B2)</option>
+                                <option value="Avançado (C1)">Avançado (C1)</option>
+                                <option value="Fluente (C2)">Fluente (C2)</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-900 bg-iuwe-purple px-2.5 py-1 rounded-xl border border-iuwe-purpleBorder">
+                            <span>Publicando como:</span>
+                            <span id="creator-active-badge" class="text-iuwe-blue">@estudante_iuwe</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Cartões de Opção de Conteúdo -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button id="tool-card-audiocast" type="button" onclick="selectCreationTool('audiocast')" class="p-2.5 rounded-xl border-2 text-left transition flex flex-col justify-between bg-purple-500 text-white border-iuwe-blue shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-base">🎧</span>
+                            <span class="px-1.5 py-0.5 rounded bg-black/20 text-[9px] font-extrabold">ÁUDIO</span>
+                        </div>
+                        <div class="mt-1.5">
+                            <div class="text-xs font-extrabold leading-tight">Audiocast</div>
+                            <div class="text-[9.5px] opacity-90">Ciclo de Fala + Pausa</div>
+                        </div>
+                    </button>
+
+                    <button id="tool-card-flashcard" type="button" onclick="selectCreationTool('flashcard')" class="p-2.5 rounded-xl border-2 text-left transition flex flex-col justify-between bg-white text-slate-900 border-iuwe-purpleBorder hover:bg-iuwe-purple/40">
+                        <div class="flex items-center justify-between">
+                            <span class="text-base">🃏</span>
+                            <span class="px-1.5 py-0.5 rounded bg-purple-100 text-iuwe-blue text-[9px] font-extrabold">CARTÃO 3D</span>
+                        </div>
+                        <div class="mt-1.5">
+                            <div class="text-xs font-extrabold leading-tight">Flashcard 3D</div>
+                            <div class="text-[9.5px] opacity-75">Frente ⇄ Verso Multi</div>
+                        </div>
+                    </button>
+
+                    <button id="tool-card-livreto" type="button" onclick="selectCreationTool('livreto')" class="p-2.5 rounded-xl border-2 text-left transition flex flex-col justify-between bg-white text-slate-900 border-iuwe-purpleBorder hover:bg-iuwe-purple/40">
+                        <div class="flex items-center justify-between">
+                            <span class="text-base">📖</span>
+                            <span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-500 text-[9px] font-extrabold">SLIDES</span>
+                        </div>
+                        <div class="mt-1.5">
+                            <div class="text-xs font-extrabold leading-tight">Livreto Ilustrado</div>
+                            <div class="text-[9.5px] opacity-75">Slides + Imagem + Voz</div>
+                        </div>
+                    </button>
+
+                    <button id="tool-card-vocabulario" type="button" onclick="selectCreationTool('vocabulario')" class="p-2.5 rounded-xl border-2 text-left transition flex flex-col justify-between bg-white text-slate-900 border-iuwe-purpleBorder hover:bg-iuwe-purple/40">
+                        <div class="flex items-center justify-between">
+                            <span class="text-base">📚</span>
+                            <span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-500 text-[9px] font-extrabold">VOCABULÁRIO</span>
+                        </div>
+                        <div class="mt-1.5">
+                            <div class="text-xs font-extrabold leading-tight">Vocabulário IA</div>
+                            <div class="text-[9.5px] opacity-75">Temas + Frases + Ditado</div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Tags personalizadas adicionais para o novo post -->
+                <div class="bg-sky-50/80 border border-sky-200 rounded-xl p-2 flex items-center justify-between gap-2 flex-wrap text-[10.5px]">
+                    <span class="font-extrabold text-slate-800"><i class="fa-solid fa-gauge-high text-iuwe-blue mr-1"></i>Cota Diária por Ferramenta (Máx. 6 posts/dia em cada):</span>
+                    <div id="creator-daily-quota-summary" class="flex items-center gap-1.5 flex-wrap"></div>
+                </div>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-iuwe-purple/35 border border-iuwe-purpleBorder rounded-xl p-2 text-xs">
+                    <span class="font-extrabold text-slate-900 text-[10.5px] whitespace-nowrap"><i class="fa-solid fa-tags text-iuwe-blue mr-1"></i>Tags do Post:</span>
+                    <input id="creator-custom-tags" type="text" value="" placeholder="Adicione #tags separadas por vírgula..." class="flex-1 bg-white border border-iuwe-purpleBorder rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800">
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- OPÇÃO 1 DE CRIAÇÃO: MÓDULO 1 — AUDIOCAST (CICLO + MODO FREE)    -->
+            <!-- =============================================================== -->
+            <div id="builder-box-audiocast" class="iuwe-card rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3">
+                <div class="flex items-center justify-between border-b border-iuwe-purpleBorder/60 pb-2 flex-wrap gap-2">
+                    <div class="w-full space-y-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-xs sm:text-sm font-extrabold text-purple-500 flex items-center gap-1.5">
+                                <i class="fa-solid fa-podcast text-iuwe-blue"></i> Construtor de Audiocast (Ciclo + Áudio / + Pausa)
+                            </h3>
+                            <button type="button" onclick="toggleTabHelpSubtitle('sub-help-audiocast')" class="w-5 h-5 rounded-full bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center text-[10px] font-extrabold cursor-pointer transition shrink-0" title="Ver explicação"><i class="fa-solid fa-question"></i></button>
+                        </div>
+                        <p id="sub-help-audiocast" class="hidden text-[10.5px] text-slate-900 bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5">Tradução automática gratuita + síntese de voz (funciona em <b>Modo Free</b> sem chave API ou com <b>Gemini 24kHz</b>).</p>
+                    </div>
+
+                </div>
+
+                <textarea id="ac-text-input" rows="2" placeholder="Digite a frase ou fala aqui..." class="w-full bg-iuwe-purple/40 border border-iuwe-purpleBorder rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-iuwe-blue resize-none"></textarea>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div>
+                        <label class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Idioma para Traduzir:</label>
+                        <select id="ac-lang-select" class="lang-select-populate w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900"></select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Voz IA / Locutor:</label>
+                        <select id="ac-voice-select" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900">
+                            <option value="Zephyr">Zephyr (Feminina • Suave)</option>
+                            <option value="Aoede">Aoede (Feminina • Expressiva)</option>
+                            <option value="Kore">Kore (Feminina • Clara)</option>
+                            <option value="Leda">Leda (Feminina • Natural)</option>
+                            <option value="Puck">Puck (Masculina • Dinâmica)</option>
+                            <option value="Charon">Charon (Masculina • Grave)</option>
+                            <option value="Fenrir">Fenrir (Masculina • Forte)</option>
+                            <option value="Orus">Orus (Masculina • Calma)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Velocidade de Reprodução:</label>
+                        <select id="ac-speed-select" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900">
+                            <option value="0.6">0.6x (Bem Pausado)</option>
+                            <option value="0.8">0.8x (Lento p/ Estudo)</option>
+                            <option value="1.0" selected>1.0x (Velocidade Natural)</option>
+                            <option value="1.2">1.2x (Fluido)</option>
+                            <option value="1.5">1.5x (Rápido)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    <button id="btn-add-audio-block" type="button" onclick="addAudioBlock()" class="py-2.5 px-3 bg-iuwe-blue hover:bg-iuwe-sky text-white font-extrabold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition">
+                        <i id="add-audio-icon" class="fa-solid fa-plus"></i>
+                        <span id="add-audio-label">Incluir Áudio na Trilha (+ Áudio)</span>
+                    </button>
+
+                    <div class="flex items-center gap-1.5">
+                        <select id="ac-pause-select" class="bg-iuwe-purple/60 border border-iuwe-purpleBorder rounded-xl px-2.5 py-2.5 text-xs font-extrabold text-slate-900 focus:outline-none">
+                            <option value="0.5">Pausa 0.5s</option>
+                            <option value="1.0">Pausa 1.0s</option>
+                            <option value="1.5" selected>Pausa 1.5s</option>
+                            <option value="2.0">Pausa 2.0s</option>
+                            <option value="2.5">Pausa 2.5s</option>
+                            <option value="3.5">Pausa 3.5s</option>
+                            <option value="5.0">Pausa 5.0s</option>
+                            <option value="7.5">Pausa 7.5s</option>
+                        </select>
+                        <button type="button" onclick="addPauseBlock()" class="flex-1 py-2.5 px-3 bg-iuwe-blue hover:bg-purple-500 text-white font-extrabold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Incluir Pausa (+ Pausa)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="border-t border-iuwe-purpleBorder/60 pt-3 space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-extrabold text-slate-900">
+                            <i class="fa-solid fa-list-ol text-iuwe-blue mr-1"></i>Blocos do Ciclo (<span id="cycle-block-count">0</span> blocos • <span id="cycle-total-duration">0.0s</span>):
+                        </span>
+                        <button type="button" onclick="clearCycleBlocks()" class="text-[11px] font-bold text-rose-500 hover:underline">Limpar Lista</button>
+                    </div>
+
+                    <div id="cycle-blocks-list" class="space-y-1.5 max-h-60 overflow-y-auto pr-0.5"></div>
+
+                    <div id="internal-preview-box" class="hidden bg-iuwe-purple/40 border border-iuwe-purpleBorder rounded-xl p-2.5 space-y-1">
+                        <div class="flex items-center justify-between text-[10px] font-bold text-purple-500">
+                            <span>🎧 Escuta de Conferência (Antes de Publicar):</span>
+                            <span class="text-slate-500">Download liberado após publicar</span>
+                        </div>
+                        <audio id="internal-preview-audio" controls controlsList="nodownload" class="w-full h-8"></audio>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        <button type="button" onclick="previewMergedAudiocast()" class="py-2.5 px-3 bg-iuwe-teal/35 hover:bg-iuwe-teal/55 text-teal-950 font-extrabold text-xs rounded-xl border border-iuwe-teal flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-headphones"></i>
+                            <span>Ouvir Prévia Unificada</span>
+                        </button>
+                        <button id="btn-post-audiocast" type="button" onclick="postAndArchiveAudiocast()" class="py-2.5 px-3 bg-gradient-to-r from-purple-900 via-purple-700 to-sky-400 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5">
+                            <i id="post-ac-icon" class="fa-solid fa-cloud-arrow-up"></i>
+                            <span id="post-ac-label">Publicar Audiocast no Feed</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- OPÇÃO 2 DE CRIAÇÃO: MÓDULO 2 — FLASHCARD 3D COMPLETO            -->
+            <!-- =============================================================== -->
+            <div id="builder-box-flashcard" class="hidden iuwe-card rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3">
+                <div class="flex items-center justify-between border-b border-iuwe-purpleBorder/60 pb-2 flex-wrap gap-2">
+                    <div class="w-full space-y-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-xs sm:text-sm font-extrabold text-purple-500 flex items-center gap-1.5">
+                                <i class="fa-solid fa-clone text-iuwe-blue"></i> Construtor de Flashcard 3D (Lado A ⇄ Lado B Multi-Idiomas)
+                            </h3>
+                            <button type="button" onclick="toggleTabHelpSubtitle('sub-help-flashcard')" class="w-5 h-5 rounded-full bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center text-[10px] font-extrabold cursor-pointer transition shrink-0" title="Ver explicação"><i class="fa-solid fa-question"></i></button>
+                        </div>
+                        <p id="sub-help-flashcard" class="hidden text-[10.5px] text-slate-900 bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5">Configure a Frente (Lado A), adicione 1 ou mais idiomas no Verso (Lado B) e teste no cartão 3D abaixo (funciona em <b>Modo Free</b> sem chave API).</p>
+                    </div>
+
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-iuwe-purple/30 border border-iuwe-purpleBorder rounded-xl p-2.5">
+                    <div>
+                        <label for="fc-voice-select" class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Voz IA (Para Áudios do Card):</label>
+                        <select id="fc-voice-select" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900">
+                            <option value="Zephyr">Zephyr (Feminina • Suave)</option>
+                            <option value="Aoede">Aoede (Feminina • Expressiva)</option>
+                            <option value="Kore">Kore (Feminina • Clara)</option>
+                            <option value="Leda">Leda (Feminina • Natural)</option>
+                            <option value="Puck">Puck (Masculina • Dinâmica)</option>
+                            <option value="Charon">Charon (Masculina • Grave)</option>
+                            <option value="Fenrir">Fenrir (Masculina • Forte)</option>
+                            <option value="Orus">Orus (Masculina • Calma)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="fc-speed-select" class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Velocidade da Pronúncia:</label>
+                        <select id="fc-speed-select" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900">
+                            <option value="0.6">0.6x (Bem Pausado)</option>
+                            <option value="0.8">0.8x (Lento p/ Estudo)</option>
+                            <option value="1.0" selected>1.0x (Velocidade Natural)</option>
+                            <option value="1.2">1.2x (Fluido)</option>
+                            <option value="1.5">1.5x (Rápido)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- LADO A (FRENTE) -->
+                <div class="bg-sky-50/70 border-2 border-iuwe-blue/40 rounded-2xl p-3 space-y-2">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <span class="px-2 py-0.5 rounded-lg bg-purple-500 text-white font-extrabold text-[10px]">LADO A • FRENTE (IDIOMA PRINCIPAL)</span>
+                        <button type="button" onclick="translateFrontTextToSelectedLang()" class="px-2 py-1 rounded-lg bg-white hover:bg-iuwe-purple text-iuwe-blue border border-iuwe-blue/40 font-extrabold text-[10px] flex items-center gap-1">
+                            <i class="fa-solid fa-language"></i> <span>Traduzir Texto p/ Idioma da Frente (Grátis)</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label for="fc-front-lang" class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Idioma Principal (Frente):</label>
+                            <select id="fc-front-lang" onchange="syncDraftPreviewCard()" class="lang-select-populate w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900"></select>
+                        </div>
+                        <div>
+                            <label for="fc-front-hint" class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Dica / Contexto / Fonética (Opcional):</label>
+                            <input id="fc-front-hint" type="text" oninput="syncDraftPreviewCard()" value="" placeholder="Ex: Formal • Uso cotidiano..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs text-slate-900">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="fc-front-text" class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Frase ou Termo Principal (Lado A):</label>
+                        <textarea id="fc-front-text" rows="2" oninput="syncDraftPreviewCard()" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl p-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-iuwe-blue resize-y" placeholder="Digite a frase ou termo principal do Lado A..."></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-iuwe-blue/20">
+                        <div id="fc-front-audio-status" class="text-[10px] font-extrabold text-slate-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-volume-xmark text-slate-400"></i>
+                            <span>Sem áudio no Lado A (Opcional)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button id="btn-gen-front-audio" type="button" onclick="generateFrontSideAudio()" class="px-3 py-1.5 rounded-xl bg-iuwe-blue hover:bg-iuwe-sky text-white font-extrabold text-[11px] flex items-center gap-1.5 shadow-sm">
+                                <i id="front-audio-icon" class="fa-solid fa-microphone-lines"></i>
+                                <span id="front-audio-label">Gerar Áudio Lado A (Opcional)</span>
+                            </button>
+                            <button id="btn-play-front-audio" type="button" onclick="playDraftFrontAudio()" class="hidden px-2.5 py-1.5 rounded-xl bg-purple-100 text-purple-500 font-extrabold text-[11px] border border-sky-300">
+                                <i class="fa-solid fa-play"></i> Ouvir
+                            </button>
+                            <button id="btn-clear-front-audio" type="button" onclick="clearDraftFrontAudio()" class="hidden px-2 py-1.5 rounded-xl bg-rose-100 text-rose-700 font-extrabold text-[11px]">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LADO B (VERSO MULTI-IDIOMAS) -->
+                <div class="bg-purple-50/80 border-2 border-purple-300 rounded-2xl p-3 space-y-2.5">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <span class="px-2 py-0.5 rounded-lg bg-iuwe-blue text-white font-extrabold text-[10px]">LADO B • VERSO (1 OU MAIS IDIOMAS SECUNDÁRIOS)</span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+
+                            <button type="button" onclick="addBackLanguageItem()" class="px-2.5 py-1 rounded-xl bg-white hover:bg-iuwe-purple text-purple-500 border border-purple-300 font-extrabold text-[10px] flex items-center gap-1">
+                                <i class="fa-solid fa-plus text-purple-600"></i>
+                                <span>+ Idioma no Verso</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="fc-back-items-list" class="space-y-2"></div>
+                </div>
+
+                <!-- PRÉVIA 3D INTERATIVA DO FLASHCARD (ANTES DE POSTAR) -->
+                <div class="border-t border-iuwe-purpleBorder/60 pt-3 space-y-2">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <span class="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-cube text-purple-600"></i> Prévia 3D Interativa (Clique no cartão ou no botão para virar):
+                        </span>
+                        <button type="button" onclick="flipDraftPreviewCard()" class="px-3 py-1 rounded-xl bg-iuwe-purple hover:bg-iuwe-purpleMid text-slate-900 border border-iuwe-purpleBorder font-extrabold text-[11px] flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrows-rotate text-iuwe-blue"></i>
+                            <span>Virar Cartão (Frente ⇄ Verso)</span>
+                        </button>
+                    </div>
+
+                    <div class="perspective-1000 cursor-pointer select-none" onclick="flipDraftPreviewCard()">
+                        <div id="draft-flip-card-inner" class="flip-card-inner">
+                            <!-- FACE FRONTAL (LADO A) -->
+                            <div class="flip-card-face bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white border-2 border-iuwe-blue shadow-md">
+                                <div class="flex items-center justify-between gap-2 text-[10px] flex-wrap">
+                                    <span id="preview-front-lang-badge" class="px-2 py-0.5 rounded-md bg-purple-500 text-white font-extrabold">🇧🇷 Português (BR)</span>
+                                    <span class="text-iuwe-teal font-bold"><i class="fa-solid fa-hand-pointer mr-1"></i>LADO A • Toque p/ virar</span>
+                                </div>
+                                <div class="my-auto py-3 text-center space-y-1.5">
+                                    <div id="preview-front-text" class="text-sm sm:text-base font-extrabold text-white leading-relaxed break-words whitespace-normal">"..."</div>
+                                    <div id="preview-front-hint" class="text-[11px] text-purple-200 italic break-words whitespace-normal"></div>
+                                </div>
+                                <div class="flex items-center justify-between gap-2 flex-wrap text-[10px] border-t border-white/15 pt-2">
+                                    <span id="preview-front-audio-badge" class="text-slate-300 font-semibold"><i class="fa-solid fa-volume-xmark mr-1"></i>Áudio Lado A: Opcional</span>
+                                    <button type="button" onclick="event.stopPropagation(); playDraftFrontAudio();" class="px-2.5 py-1 rounded-lg bg-iuwe-blue/30 hover:bg-iuwe-blue/50 text-iuwe-teal font-extrabold border border-iuwe-blue/50">
+                                        <i class="fa-solid fa-volume-high mr-1"></i>Ouvir Lado A
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- FACE TRASEIRA (LADO B) -->
+                            <div class="flip-card-face flip-card-back bg-gradient-to-br from-purple-950 via-indigo-950 to-slate-900 text-white border-2 border-iuwe-teal shadow-md">
+                                <div class="flex items-center justify-between gap-2 text-[10px] flex-wrap">
+                                    <span class="px-2 py-0.5 rounded-md bg-iuwe-teal text-white font-extrabold">LADO B • TRADUÇÕES &amp; PRONÚNCIA</span>
+                                    <span class="text-purple-200 font-bold"><i class="fa-solid fa-rotate-left mr-1"></i>Voltar ao Lado A</span>
+                                </div>
+                                <div id="preview-back-translations-list" class="my-auto py-2.5 space-y-2"></div>
+                                <div class="flex items-center justify-between gap-2 flex-wrap text-[10px] border-t border-white/15 pt-2">
+                                    <span class="text-iuwe-teal font-semibold">Download/Compartilhamento liberados ao Publicar</span>
+                                    <button type="button" onclick="event.stopPropagation(); playMergedFlashcardPreview();" class="px-2.5 py-1 rounded-lg bg-iuwe-teal/25 hover:bg-iuwe-teal/40 text-iuwe-teal font-extrabold border border-iuwe-teal/50">
+                                        <i class="fa-solid fa-headphones mr-1"></i>Ouvir Card Completo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- CAIXA DE SELEÇÃO DE COR DO FUNDO E DO TEXTO (FLASHCARD) -->
+                    <div class="bg-iuwe-purple/40 border border-iuwe-purpleBorder rounded-2xl p-3 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <span class="text-[11px] font-extrabold text-slate-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-palette text-purple-600"></i>
+                                <span>Personalizar Cor do Fundo e do Texto:</span>
+                            </span>
+                            <span class="text-[10px] font-bold text-purple-700">Aplicado ao vivo no card, no Feed e no download .HTML</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+                            <div>
+                                <label for="fc-color-preset" class="text-[10px] font-extrabold text-slate-900 block mb-1">Combinações Harmônicas:</label>
+                                <select id="fc-color-preset" onchange="applyStudioColorCustomization('flashcard', 'preset')" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900">
+                                    <option value="noite_iuwe" selected>🌌 Noite Estelar IUWE (Escuro)</option>
+                                    <option value="lavanda_claro" >💜 Lavanda Suave IUWE (Claro)</option>
+                                    <option value="oceano_escuro" >🌊 Oceano Profundo (Escuro)</option>
+                                    <option value="gelo_claro" >❄️ Azul Gelo Canadense (Claro)</option>
+                                    <option value="esmeralda_escuro" >🌲 Floresta Esmeralda (Escuro)</option>
+                                    <option value="pergaminho_claro" >📜 Pergaminho Sépia (Claro)</option>
+                                    <option value="grafite_escuro" >🖤 Grafite Minimalista (Escuro)</option>
+                                    <option value="branco_classico" >🤍 Branco Clássico (Claro)</option>
+                                    <option value="custom">🎨 Cores Personalizadas</option>
+                                </select>
+                            </div>
+                            <div class="bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-2">
+                                <div>
+                                    <label for="fc-bg-color" class="text-[10px] font-extrabold text-slate-900 block">Cor do Fundo:</label>
+                                    <span id="fc-bg-hex-label" class="text-[10px] font-mono font-bold text-slate-500">#1E1B4B</span>
+                                </div>
+                                <input id="fc-bg-color" type="color" value="#1e1b4b" oninput="applyStudioColorCustomization('flashcard', 'picker')" class="w-9 h-7 rounded cursor-pointer border border-slate-300 bg-transparent p-0">
+                            </div>
+                            <div class="bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-2">
+                                <div>
+                                    <label for="fc-text-color" class="text-[10px] font-extrabold text-slate-900 block">Cor do Texto:</label>
+                                    <span id="fc-text-hex-label" class="text-[10px] font-mono font-bold text-slate-500">#FFFFFF</span>
+                                </div>
+                                <input id="fc-text-color" type="color" value="#ffffff" oninput="applyStudioColorCustomization('flashcard', 'picker')" class="w-9 h-7 rounded cursor-pointer border border-slate-300 bg-transparent p-0">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="api-cooldown-status-fc" class="rounded-xl px-3 py-1.5 text-[10.5px] font-bold bg-emerald-50/80 border border-emerald-200 text-emerald-900 flex items-center justify-between gap-2">
+                        <span><i class="fa-solid fa-shield-heart text-emerald-600 mr-1.5"></i>Proteção Anti-Bloqueio de API ativa: gere 1 áudio/tradução por vez (pausa automática de 8s entre cliques).</span>
+                    </div>
+                    <div class="pt-2">
+                        <button id="btn-post-flashcard" type="button" onclick="postAndArchiveFlashcard()" class="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 via-iuwe-blue to-iuwe-sky text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5">
+                            <i id="post-fc-icon" class="fa-solid fa-cloud-arrow-up"></i>
+                            <span id="post-fc-label">Publicar Flashcard 3D no Feed</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- OPÇÃO 3 DE CRIAÇÃO: MÓDULO 3 — LIVRETO ILUSTRADO (SLIDE BOOK)   -->
+            <!-- =============================================================== -->
+            <div id="builder-box-livreto" class="hidden iuwe-card rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3">
+                <div class="flex items-center justify-between border-b border-iuwe-purpleBorder/60 pb-2 flex-wrap gap-2">
+                    <div class="w-full space-y-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-xs sm:text-sm font-extrabold text-purple-500 flex items-center gap-1.5">
+                                <i class="fa-solid fa-book-open text-iuwe-blue"></i> Construtor de Livreto Ilustrado (Slide Book + Até 3 Idiomas)
+                            </h3>
+                            <button type="button" onclick="toggleTabHelpSubtitle('sub-help-livreto')" class="w-5 h-5 rounded-full bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center text-[10px] font-extrabold cursor-pointer transition shrink-0" title="Ver explicação"><i class="fa-solid fa-question"></i></button>
+                        </div>
+                        <p id="sub-help-livreto" class="hidden text-[10.5px] text-slate-900 bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5">Personalize voz/personagem, velocidade, imagem e até 3 idiomas por página (funciona em <b>Modo Free</b> sem chave API).</p>
+                    </div>
+
+                </div>
+
+                <div>
+                    <label for="bk-title-input" class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Título do Livreto / História:</label>
+                    <input id="bk-title-input" type="text" oninput="renderActiveSlideStage()" value="" placeholder="Digite o título do livreto ou história..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-800">
+                </div>
+
+                <!-- BARRA DE PÁGINAS (SLIDES) -->
+                <div class="bg-purple-50/80 border-2 border-purple-300 rounded-2xl p-2.5 space-y-2">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <span class="text-[11px] font-extrabold text-slate-900">
+                            <i class="fa-solid fa-images text-purple-700 mr-1"></i>Páginas do Livreto (<span id="bk-slides-count">2</span> slides):
+                        </span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button type="button" onclick="duplicateCurrentSlideForAnotherLang()" class="px-2.5 py-1 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-copy"></i> <span>Duplicar Slide</span>
+                            </button>
+                            <button type="button" onclick="addNewBlankSlide()" class="px-2.5 py-1 rounded-xl bg-iuwe-blue hover:bg-purple-500 text-white font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-plus"></i> <span>+ Novo Slide</span>
+                            </button>
+                            <button type="button" onclick="removeCurrentSlide()" class="px-2 py-1 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 font-extrabold text-[10px] flex items-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="bk-slide-tabs" class="flex items-center gap-1.5 overflow-x-auto pb-1"></div>
+                </div>
+
+                <!-- CAIXA DE CONFIGURAÇÃO DO SLIDE (ITENS 1 A 6) -->
+                <div class="bg-white border-2 border-iuwe-purpleBorder rounded-2xl p-3 space-y-3">
+                    <div class="flex items-center justify-between border-b border-iuwe-purpleBorder/50 pb-1.5 flex-wrap gap-1">
+                        <span id="editor-slide-heading" class="text-xs font-extrabold text-slate-900">
+                            <i class="fa-solid fa-sliders text-sky-500 mr-1"></i>Configuração da Página / Slide 1
+                        </span>
+                        <span class="text-[10px] font-bold text-purple-700">Personalize voz, imagem e até 3 idiomas neste slide</span>
+                    </div>
+
+                    <!-- ITENS 1 e 2: VOZ & VELOCIDADE -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-iuwe-purple/35 border border-iuwe-purpleBorder rounded-xl p-2.5">
+                        <div>
+                            <label for="bk-voice-select" class="text-[10px] font-extrabold text-slate-900 block mb-1">
+                                Voz IA (Narração do Slide):
+                            </label>
+                            <select id="bk-voice-select" onchange="updateCurrentSlideField('voice', this.value)" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900">
+                                <option value="Zephyr">Zephyr (Feminina • Personagem Suave)</option>
+                                <option value="Aoede">Aoede (Feminina • Personagem Expressiva)</option>
+                                <option value="Kore">Kore (Feminina • Narradora Clara)</option>
+                                <option value="Leda">Leda (Feminina • Conversa Natural)</option>
+                                <option value="Puck">Puck (Masculina • Personagem Dinâmico)</option>
+                                <option value="Charon">Charon (Masculina • Narrador Grave)</option>
+                                <option value="Fenrir">Fenrir (Masculina • Personagem Forte)</option>
+                                <option value="Orus">Orus (Masculina • Narrador Calmo)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="bk-speed-select" class="text-[10px] font-extrabold text-slate-900 block mb-1">
+                                Velocidade da Narração:
+                            </label>
+                            <select id="bk-speed-select" onchange="updateCurrentSlideField('speed', this.value)" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900">
+                                <option value="0.6">0.6x (Bem Pausado)</option>
+                                <option value="0.8">0.8x (Lento p/ Estudo)</option>
+                                <option value="1.0" selected>1.0x (Velocidade Natural)</option>
+                                <option value="1.2">1.2x (Fluido)</option>
+                                <option value="1.5">1.5x (Rápido)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- ITEM 3: ILUSTRAÇÃO DO SLIDE (APENAS UPLOAD DE IMAGEM + LINK EXTERNO PARA O GEMINI) -->
+                    <div class="bg-purple-50/70 border border-purple-300 rounded-xl p-2.5 space-y-1.5">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <span class="px-2 py-0.5 rounded-md bg-iuwe-blue text-white font-extrabold text-[10px]">ILUSTRAÇÃO DO SLIDE</span>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-iuwe-blue to-purple-600 hover:opacity-95 text-white font-extrabold text-[10px] flex items-center gap-1 shadow-2xs">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    <span>Gerar com IA no Gemini ↗</span>
+                                </a>
+                                <label class="cursor-pointer px-2.5 py-1 rounded-lg bg-white hover:bg-purple-100 border border-purple-400 text-slate-900 font-extrabold text-[10px] flex items-center gap-1 shadow-2xs">
+                                    <i class="fa-solid fa-upload text-purple-700"></i>
+                                    <span>Fazer Upload de Imagem</span>
+                                    <input type="file" accept="image/*" onchange="handleCustomSlideImageUpload(event)" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-purple-500">Gere sua ilustração no Gemini e faça o upload: o sistema converte automaticamente para formato WebP ultracompacto (560×315) para economizar memória.</p>
+                    </div>
+
+                    <!-- ITEM 4: IDIOMA PRINCIPAL DO SLIDE -->
+                    <div class="bg-sky-50/75 border border-iuwe-blue/40 rounded-xl p-2.5 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <span class="px-2 py-0.5 rounded-md bg-purple-500 text-white font-extrabold text-[10px]">IDIOMA PRINCIPAL DO SLIDE</span>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <label class="flex items-center gap-1 text-[10px] font-extrabold text-slate-900 cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-iuwe-blue/30">
+                                    <input id="bk-hide-primary-text" type="checkbox" onchange="updateCurrentSlideField('hidePrimaryText', this.checked)" class="rounded text-iuwe-blue">
+                                    <span><i class="fa-solid fa-eye-slash text-iuwe-blue mr-0.5"></i>Ocultar texto no slide</span>
+                                </label>
+                                <button type="button" onclick="translateCurrentSlidePrimaryText()" class="px-2 py-0.5 rounded-lg bg-white hover:bg-iuwe-purple text-iuwe-blue border border-iuwe-blue/40 font-extrabold text-[10px] flex items-center gap-1">
+                                    <i class="fa-solid fa-language"></i> <span>Traduzir (Grátis)</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div>
+                                <select id="bk-primary-lang" onchange="updateCurrentSlideField('primaryLang', this.value)" class="lang-select-populate w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900"></select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <textarea id="bk-primary-text" rows="2" oninput="updateCurrentSlideField('primaryText', this.value)" placeholder="Digite a fala no idioma principal..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 resize-y"></textarea>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-iuwe-blue/20 text-[10px]">
+                            <span id="bk-primary-audio-status" class="font-bold text-slate-900">Áudio Principal: Não gerado</span>
+                            <div class="flex items-center gap-1.5">
+                                <button id="bk-btn-gen-primary-audio" type="button" onclick="generateCurrentSlideLangAudio('primary')" class="px-2.5 py-1 rounded-lg bg-iuwe-blue hover:bg-iuwe-sky text-white font-extrabold text-[10px] flex items-center gap-1">
+                                    <i id="bk-primary-audio-icon" class="fa-solid fa-microphone-lines"></i>
+                                    <span id="bk-primary-audio-label">Gerar Áudio (Idioma Principal)</span>
+                                </button>
+                                <button id="bk-btn-play-primary-audio" type="button" onclick="playCurrentSlideAudio('primary')" class="hidden px-2 py-1 rounded-lg bg-purple-100 text-purple-500 font-extrabold text-[10px] border border-sky-300">
+                                    <i class="fa-solid fa-play"></i> Ouvir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ITEM 5: IDIOMA SECUNDÁRIO / TRADUÇÃO -->
+                    <div class="bg-purple-50/75 border border-purple-300 rounded-xl p-2.5 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <label class="flex items-center gap-1.5 cursor-pointer">
+                                <input id="bk-enable-secondary" type="checkbox" checked onchange="updateCurrentSlideField('enableSecondary', this.checked)" class="rounded text-purple-600">
+                                <span class="px-2 py-0.5 rounded-md bg-iuwe-blue text-white font-extrabold text-[10px]">IDIOMA SECUNDÁRIO / TRADUÇÃO (OPCIONAL)</span>
+                            </label>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <label class="flex items-center gap-1 text-[10px] font-extrabold text-slate-900 cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-purple-300">
+                                    <input id="bk-hide-secondary-text" type="checkbox" onchange="updateCurrentSlideField('hideSecondaryText', this.checked)" class="rounded text-purple-600">
+                                    <span><i class="fa-solid fa-eye-slash text-purple-600 mr-0.5"></i>Ocultar texto no slide</span>
+                                </label>
+                                <button type="button" onclick="translateCurrentSlideSecondaryFromPrimary()" class="px-2 py-0.5 rounded-lg bg-purple-600 hover:bg-iuwe-blue text-white font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Traduzir do Idioma Principal</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="bk-secondary-controls" class="space-y-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div>
+                                    <select id="bk-secondary-lang" onchange="onChangeSecondaryLang(this.value)" class="lang-select-populate w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900"></select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <textarea id="bk-secondary-text" rows="2" oninput="updateCurrentSlideField('secondaryText', this.value)" placeholder="Tradução no 2º idioma..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 resize-y"></textarea>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-purple-200 text-[10px]">
+                                <span id="bk-secondary-audio-status" class="font-bold text-slate-900">Áudio Secundário (Opcional): Não gerado</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="bk-btn-gen-secondary-audio" type="button" onclick="generateCurrentSlideLangAudio('secondary')" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-iuwe-blue text-white font-extrabold text-[10px] flex items-center gap-1">
+                                        <i id="bk-secondary-audio-icon" class="fa-solid fa-microphone-lines"></i>
+                                        <span id="bk-secondary-audio-label">Gerar Áudio (Idioma Secundário)</span>
+                                    </button>
+                                    <button id="bk-btn-play-secondary-audio" type="button" onclick="playCurrentSlideAudio('secondary')" class="hidden px-2 py-1 rounded-lg bg-purple-100 text-purple-500 font-extrabold text-[10px] border border-sky-300">
+                                        <i class="fa-solid fa-play"></i> Ouvir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ITEM 6: IDIOMA TERCIÁRIO / 3º IDIOMA -->
+                    <div class="bg-purple-50/75 border border-purple-300 rounded-xl p-2.5 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <label class="flex items-center gap-1.5 cursor-pointer">
+                                <input id="bk-enable-tertiary" type="checkbox" onchange="updateCurrentSlideField('enableTertiary', this.checked)" class="rounded text-sky-500">
+                                <span class="px-2 py-0.5 rounded-md bg-iuwe-blue text-white font-extrabold text-[10px]">IDIOMA TERCIÁRIO / 3º IDIOMA (OPCIONAL • MÁX 3)</span>
+                            </label>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <label class="flex items-center gap-1 text-[10px] font-extrabold text-teal-950 cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-iuwe-purpleBorder">
+                                    <input id="bk-hide-tertiary-text" type="checkbox" onchange="updateCurrentSlideField('hideTertiaryText', this.checked)" class="rounded text-sky-500">
+                                    <span><i class="fa-solid fa-eye-slash text-sky-500 mr-0.5"></i>Ocultar texto no slide</span>
+                                </label>
+                                <button type="button" onclick="translateCurrentSlideTertiaryFromPrimary()" class="px-2 py-0.5 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Traduzir do Idioma Principal</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="bk-tertiary-controls" class="space-y-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div>
+                                    <select id="bk-tertiary-lang" onchange="onChangeTertiaryLang(this.value)" class="lang-select-populate w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-teal-950"></select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <textarea id="bk-tertiary-text" rows="2" oninput="updateCurrentSlideField('tertiaryText', this.value)" placeholder="Tradução no 3º idioma..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 resize-y"></textarea>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-teal-200 text-[10px]">
+                                <span id="bk-tertiary-audio-status" class="font-bold text-slate-900">Áudio Terciário (Opcional): Não gerado</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="bk-btn-gen-tertiary-audio" type="button" onclick="generateCurrentSlideLangAudio('tertiary')" class="px-2.5 py-1 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-extrabold text-[10px] flex items-center gap-1">
+                                        <i id="bk-tertiary-audio-icon" class="fa-solid fa-microphone-lines"></i>
+                                        <span id="bk-tertiary-audio-label">Gerar Áudio (Idioma Terciário)</span>
+                                    </button>
+                                    <button id="bk-btn-play-tertiary-audio" type="button" onclick="playCurrentSlideAudio('tertiary')" class="hidden px-2 py-1 rounded-lg bg-purple-100 text-purple-500 font-extrabold text-[10px] border border-sky-300">
+                                        <i class="fa-solid fa-play"></i> Ouvir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PALCO DE PRÉVIA E APRESENTAÇÃO DE SLIDES INTERATIVA -->
+                <div class="border-t border-iuwe-purpleBorder/60 pt-3 space-y-2">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-tv text-sky-500"></i> Palco do Slide:
+                            </span>
+                            <label class="flex items-center gap-1 text-[10px] font-extrabold text-purple-500 bg-iuwe-purple px-2 py-0.5 rounded-lg border border-iuwe-purpleBorder cursor-pointer">
+                                <input id="chk-autoplay-on-slide-change" type="checkbox" checked class="rounded text-iuwe-blue">
+                                <span>Tocar diálogo ao passar o slide</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="navigateDraftSlide(-1, true)" class="px-2.5 py-1 rounded-xl bg-iuwe-purple hover:bg-iuwe-purpleMid text-slate-900 border border-iuwe-purpleBorder font-extrabold text-[11px]">
+                                <i class="fa-solid fa-chevron-left"></i> Anterior
+                            </button>
+                            <span id="stage-slide-counter" class="text-[11px] font-extrabold text-purple-500 px-2">Slide 1 / 2</span>
+                            <button type="button" onclick="navigateDraftSlide(1, true)" class="px-2.5 py-1 rounded-xl bg-iuwe-purple hover:bg-iuwe-purpleMid text-slate-900 border border-iuwe-purpleBorder font-extrabold text-[11px]">
+                                Próximo <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="slide-stage p-3.5 sm:p-4 text-white shadow-lg space-y-3">
+                        <div class="flex items-center justify-between gap-2 text-[10px] flex-wrap border-b border-white/15 pb-2">
+                            <span id="stage-book-title" class="font-extrabold text-iuwe-teal">📖 Livreto IUWE</span>
+                            <div class="flex items-center gap-1.5">
+                                <span id="stage-voice-badge" class="px-2 py-0.5 rounded bg-white/15 text-purple-200 font-bold">🎙️ Zephyr (1.0x)</span>
+                                <span id="stage-page-badge" class="px-2 py-0.5 rounded bg-iuwe-blue text-white font-extrabold">PÁGINA 1</span>
+                            </div>
+                        </div>
+
+                        <div class="relative rounded-xl overflow-hidden bg-slate-950 border border-white/20">
+                            <img id="stage-slide-image" src="" alt="Ilustração do Slide" class="w-full h-48 sm:h-56 object-cover block">
+                        </div>
+
+                        <div id="stage-languages-container" class="space-y-2"></div>
+
+                        <div class="flex items-center justify-between gap-2 flex-wrap text-[10px] border-t border-white/15 pt-2">
+                            <span class="text-purple-200">Passe o slide nas setas acima para iniciar o diálogo ou inicie a Apresentação:</span>
+                            <button id="btn-draft-slideshow" type="button" onclick="toggleDraftSlideshow()" class="px-3 py-1.5 rounded-xl bg-iuwe-blue hover:bg-purple-600 text-white font-extrabold flex items-center gap-1.5 shadow-sm">
+                                <i id="draft-slideshow-icon" class="fa-solid fa-clapperboard"></i>
+                                <span id="draft-slideshow-label">▶️ Apresentação de Slides</span>
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <!-- CAIXA DE SELEÇÃO DE COR DO FUNDO E DO TEXTO (LIVRETO) -->
+                    <div class="bg-iuwe-purple/40 border border-iuwe-purpleBorder rounded-2xl p-3 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <span class="text-[11px] font-extrabold text-slate-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-palette text-purple-600"></i>
+                                <span>Personalizar Cor do Fundo e do Texto:</span>
+                            </span>
+                            <span class="text-[10px] font-bold text-purple-700">Aplicado ao vivo no card, no Feed e no download .HTML</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+                            <div>
+                                <label for="bk-color-preset" class="text-[10px] font-extrabold text-slate-900 block mb-1">Combinações Harmônicas:</label>
+                                <select id="bk-color-preset" onchange="applyStudioColorCustomization('livreto', 'preset')" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900">
+                                    <option value="noite_iuwe" selected>🌌 Noite Estelar IUWE (Escuro)</option>
+                                    <option value="lavanda_claro" >💜 Lavanda Suave IUWE (Claro)</option>
+                                    <option value="oceano_escuro" >🌊 Oceano Profundo (Escuro)</option>
+                                    <option value="gelo_claro" >❄️ Azul Gelo Canadense (Claro)</option>
+                                    <option value="esmeralda_escuro" >🌲 Floresta Esmeralda (Escuro)</option>
+                                    <option value="pergaminho_claro" >📜 Pergaminho Sépia (Claro)</option>
+                                    <option value="grafite_escuro" >🖤 Grafite Minimalista (Escuro)</option>
+                                    <option value="branco_classico" >🤍 Branco Clássico (Claro)</option>
+                                    <option value="custom">🎨 Cores Personalizadas</option>
+                                </select>
+                            </div>
+                            <div class="bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-2">
+                                <div>
+                                    <label for="bk-bg-color" class="text-[10px] font-extrabold text-slate-900 block">Cor do Fundo:</label>
+                                    <span id="bk-bg-hex-label" class="text-[10px] font-mono font-bold text-slate-500">#1E1B4B</span>
+                                </div>
+                                <input id="bk-bg-color" type="color" value="#1e1b4b" oninput="applyStudioColorCustomization('livreto', 'picker')" class="w-9 h-7 rounded cursor-pointer border border-slate-300 bg-transparent p-0">
+                            </div>
+                            <div class="bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-2">
+                                <div>
+                                    <label for="bk-text-color" class="text-[10px] font-extrabold text-slate-900 block">Cor do Texto:</label>
+                                    <span id="bk-text-hex-label" class="text-[10px] font-mono font-bold text-slate-500">#FFFFFF</span>
+                                </div>
+                                <input id="bk-text-color" type="color" value="#ffffff" oninput="applyStudioColorCustomization('livreto', 'picker')" class="w-9 h-7 rounded cursor-pointer border border-slate-300 bg-transparent p-0">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="api-cooldown-status-bk" class="rounded-xl px-3 py-1.5 text-[10.5px] font-bold bg-emerald-50/80 border border-emerald-200 text-emerald-900 flex items-center justify-between gap-2">
+                        <span><i class="fa-solid fa-shield-heart text-emerald-600 mr-1.5"></i>Proteção Anti-Bloqueio de API ativa: gere 1 áudio/tradução por vez (pausa automática de 8s entre cliques).</span>
+                    </div>
+                    <div class="pt-2">
+                        <button id="btn-post-booklet" type="button" onclick="postAndArchiveBooklet()" class="w-full py-2.5 px-4 bg-gradient-to-r from-amber-500 via-iuwe-blue to-purple-600 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5">
+                            <i id="post-bk-icon" class="fa-solid fa-cloud-arrow-up"></i>
+                            <span id="post-bk-label">Publicar Livreto Ilustrado no Feed</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- OPÇÃO 4 DE CRIAÇÃO: MÓDULO 4 — VOCABULÁRIO IA COMPLETO          -->
+            <!-- =============================================================== -->
+            <div id="builder-box-vocabulario" class="hidden iuwe-card rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3">
+                <div class="flex items-center justify-between border-b border-iuwe-purpleBorder/60 pb-2 flex-wrap gap-2">
+                    <div class="w-full space-y-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-xs sm:text-sm font-extrabold text-purple-500 flex items-center gap-1.5">
+                                <i class="fa-solid fa-spell-check text-iuwe-blue"></i> Gerador de Vocabulário &amp; Frases Contextuais (IA / Modo Free)
+                            </h3>
+                            <button type="button" onclick="toggleTabHelpSubtitle('sub-help-vocab')" class="w-5 h-5 rounded-full bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center text-[10px] font-extrabold cursor-pointer transition shrink-0" title="Ver explicação"><i class="fa-solid fa-question"></i></button>
+                        </div>
+                        <p id="sub-help-vocab" class="hidden text-[10.5px] text-slate-900 bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5">Escolha um tema no catálogo ou digite livremente para gerar termos com frases em até 3 idiomas e treino de ditado (funciona 100% em <b>Modo Free</b> sem chave API).</p>
+                    </div>
+
+                </div>
+
+                <!-- Painel Gerador Temático -->
+                <div class="bg-sky-50/80 border-2 border-sky-300 rounded-2xl p-3 space-y-2.5">
+                    <div>
+                        <label for="vc-topic-catalog-select" class="text-[10px] font-extrabold text-slate-900 block mb-1">
+                            <i class="fa-solid fa-list-check text-purple-700 mr-1"></i>Catálogo de Tópicos (Viagem, Dia a Dia, Negócios, Estudos, Indústria/Trades e Gramática Geral):
+                        </label>
+                        <select id="vc-topic-catalog-select" onchange="selectCatalogTopicForVocab(this.value)" class="w-full bg-white border border-sky-300 rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900 focus:outline-none focus:border-emerald-600">
+                            <option value="">— Escolha um tema pronto na lista (ou digite livremente abaixo) —</option>
+                            <optgroup label="✈️ Viagem e Situações Práticas">
+                                <option value="Frases Gerais do Dia a Dia e Viagem">💬 Frases Gerais do Dia a Dia</option>
+                                <option value="Aeroporto, Check-in, Embarque e Voos">🛫 Aeroporto, Check-in e Embarque</option>
+                                <option value="No Avião e Serviço de Bordo">✈️ No Avião e Serviço de Bordo</option>
+                                <option value="Imigração, Controle de Passaporte e Alfândega">🛂 Imigração e Alfândega</option>
+                                <option value="Hotel, Reserva, Check-in e Hospedagem">🏨 Hotel e Hospedagem</option>
+                                <option value="Restaurantes, Pedidos no Cardápio e Refeições">🍽️ Restaurantes e Refeições</option>
+                                <option value="Lanchonete, Cafeteria e Fast Food">🍔 Lanchonete, Café e Fast Food</option>
+                                <option value="Compras no Shopping, Roupas, Tamanhos e Preços">🛍️ Compras e Shopping</option>
+                                <option value="Táxi e Aplicativo de Transporte (Uber / Lyft)">🚕 Táxi e Aplicativo de Transporte</option>
+                                <option value="Transporte Público, Ônibus, Metrô e Direções na Rua">🚌 Transporte Público, Metrô e Direções</option>
+                                <option value="Aluguel de Carro, Posto de Gasolina e Direção no Exterior">🚗 Aluguel de Carro e Direção</option>
+                                <option value="Câmbio de Moedas, Cartões e Pagamentos">💱 Câmbio de Moedas e Pagamentos</option>
+                                <option value="Conversas Casuais e Pedidos de Ajuda em Viagem">🤝 Conversas Casuais e Úteis</option>
+                                <option value="Emergência Médica, Sintomas, Hospital e Farmácia">🚑 Emergência Médica e Farmácia</option>
+                                <option value="Emergência Policial, Documentos Perdidos e Segurança">🚨 Emergência Policial e Segurança</option>
+                            </optgroup>
+                            <optgroup label="💼 Dia a Dia, Negócios, Estudos e Tecnologia">
+                                <option value="Conversa Casual do Dia a Dia e Rotina Diária">💬 Conversa do Dia a Dia e Rotina</option>
+                                <option value="Apresentações Pessoais, Networking e Fazer Novos Amigos">🤝 Apresentações e Amigos</option>
+                                <option value="Trabalho, Reuniões de Escritório, Negócios e E-mails Corporativos">💼 Negócios, Trabalho e Reuniões</option>
+                                <option value="Entrevista de Emprego, Perguntas de RH e Carreira">🎯 Entrevista de Emprego e Carreira</option>
+                                <option value="Negociação Comercial, Vendas, Finanças e Atendimento ao Cliente">📊 Negociação, Vendas e Atendimento</option>
+                                <option value="Escola, Universidade, Intercâmbio Acadêmico e Estudos">🎓 Estudos, Universidade e Idiomas</option>
+                                <option value="Tecnologia, Desenvolvimento de Software, IA, Internet e Smartphones">💻 Tecnologia, TI e Desenvolvimento</option>
+                                <option value="Esportes, Academia, Treino, Saúde e Bem-Estar">🏃 Esportes, Academia e Saúde</option>
+                                <option value="Filmes, Séries, Música, Hobbies e Cultura">🎬 Filmes, Música e Lazer</option>
+                            </optgroup>
+                            <optgroup label="🏗️ Indústria, Construção e Skilled Trades (Ofícios Técnicos)">
+                                <option value="Construção Civil, Canteiro de Obras, Ferramentas e Medições">🏗️ Construção Civil e Canteiro de Obras</option>
+                                <option value="Elétrica Industrial e Residencial, Painéis e Manutenção">⚡ Elétrica Industrial e Residencial</option>
+                                <option value="Mecânica Industrial, Automotiva, HVAC (Climatização) e Hidráulica">🔧 Mecânica, HVAC e Hidráulica (Plumbing)</option>
+                                <option value="Manufatura, Chão de Fábrica, Linha de Produção e Logística">🏭 Manufatura, Chão de Fábrica e Logística</option>
+                                <option value="Soldagem (Welding), Usinagem CNC, Caldeiraria e Metalurgia">🔥 Soldagem (Welding), CNC e Metalurgia</option>
+                                <option value="Segurança do Trabalho (EPI / PPE, Normas OSHA / WHMIS e Inspeção)">🦺 Segurança do Trabalho (EPI / PPE e Normas)</option>
+                            </optgroup>
+                            <optgroup label="📚 Gramática Geral e Vocabulário Essencial">
+                                <option value="Top 50 Verbos Essenciais Aplicados em Frases do Cotidiano">⚡ Top 50 Verbos Essenciais (Ação e Rotina)</option>
+                                <option value="Top 50 Substantivos Comuns e Essenciais em Contexto">📘 Top 50 Substantivos Comuns</option>
+                                <option value="Top 50 Adjetivos Comuns, Descritivos e Comparativos">✨ Top 50 Adjetivos Comuns</option>
+                                <option value="Conectivos, Preposições, Advérbios e Palavras de Transição">🔗 Conectivos, Preposições e Advérbios</option>
+                                <option value="Phrasal Verbs e Expressões Idiomáticas Essenciais">🗣️ Phrasal Verbs e Expressões Idiomáticas</option>
+                                <option value="Tempos Verbais na Prática (Passado, Presente, Futuro e Condicional)">⏱️ Tempos Verbais na Prática</option>
+                                <option value="Top 100 Palavras Fundamentais para Comunicação Rápida">🔤 Top 100 Palavras Fundamentais</option>
+                                <option value="Top 1000 Palavras de Vocabulário Geral em Frases">📚 Top 1000 Palavras de Vocabulário</option>
+                                <option value="Top 3000 Palavras de Vocabulário Avançado, Profissional e Acadêmico">🎓 Top 3000 Palavras de Vocabulário</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- Linha 1: Tema / Nível CEFR / Idioma -->
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 items-end">
+                        <div class="sm:col-span-2">
+                            <label for="vc-theme-input" class="text-[10px] font-extrabold text-slate-900 block mb-0.5 truncate">Tema ou Palavras-Chave:</label>
+                            <input id="vc-theme-input" type="text" oninput="renderActiveVocabStage()" value="" placeholder="Ex: Entrevista de emprego, Restaurante, Hospital..." class="w-full bg-white border border-sky-300 rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-800">
+                        </div>
+                        <div>
+                            <label for="vc-level-select" class="text-[10px] font-extrabold text-slate-900 block mb-0.5 truncate">Nível CEFR:</label>
+                            <select id="vc-level-select" class="w-full bg-white border border-sky-300 rounded-xl px-2 py-1.5 text-xs font-bold text-slate-900">
+                                <option value="Iniciante (A1-A2)">Iniciante (A1-A2)</option>
+                                <option value="Intermediário (B1-B2)" selected>Intermediário (B1-B2)</option>
+                                <option value="Avançado (C1)">Avançado (C1)</option>
+                                <option value="Fluente (C2)">Fluente (C2)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="vc-generator-lang-select" class="text-[10px] font-extrabold text-slate-900 block mb-0.5 truncate">Idioma Principal:</label>
+                            <select id="vc-generator-lang-select" onchange="onChangeGeneratorPrimaryLang(this.value)" class="lang-select-populate w-full bg-white border border-sky-300 rounded-xl px-2 py-1.5 text-xs font-extrabold text-slate-900"></select>
+                        </div>
+                    </div>
+
+                    <!-- Linha 2: Nº de Sentenças / Tamanho da Sentença -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
+                        <div>
+                            <label for="vc-count-select" class="text-[10px] font-extrabold text-slate-900 block mb-0.5 truncate">Nº de Sentenças:</label>
+                            <select id="vc-count-select" class="w-full bg-white border border-sky-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900">
+                                <option value="3" selected>3 Sentenças (Termos)</option>
+                                <option value="4">4 Sentenças (Termos)</option>
+                                <option value="5">5 Sentenças (Termos)</option>
+                                <option value="6">6 Sentenças (Termos)</option>
+                                <option value="8">8 Sentenças (Termos)</option>
+                                <option value="10">10 Sentenças (Termos)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="vc-sentence-length-select" class="text-[10px] font-extrabold text-slate-900 block mb-0.5 truncate">Tamanho da Sentença:</label>
+                            <select id="vc-sentence-length-select" class="w-full bg-white border border-sky-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900">
+                                <option value="7">Até 7 palavras</option>
+                                <option value="11" selected>Até 11 palavras</option>
+                                <option value="17">Até 17 palavras</option>
+                                <option value="23">Até 23 palavras</option>
+                                <option value="29">Até 29 palavras</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button id="btn-generate-ai-vocab" type="button" onclick="generateVocabularyListWithGeminiAI()" class="w-full py-2.5 px-3 bg-gradient-to-r from-purple-800 to-purple-600 hover:from-purple-900 hover:to-purple-700 text-white font-extrabold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2 active:scale-95 transition">
+                        <i id="gen-vocab-icon" class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span id="gen-vocab-label">✨ Gerar Vocabulário &amp; Frases Contextuais (IA / Modo Free)</span>
+                    </button>
+                </div>
+
+                <!-- BARRA DE TERMOS DO CADERNO -->
+                <div class="bg-iuwe-purple/50 border-2 border-iuwe-purpleBorder rounded-2xl p-2.5 space-y-2">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <span class="text-[11px] font-extrabold text-slate-900">
+                            <i class="fa-solid fa-list-check text-purple-700 mr-1"></i>Termos do Caderno (<span id="vc-items-count">3</span> termos):
+                        </span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button type="button" onclick="duplicateCurrentVocabItem()" class="px-2.5 py-1 rounded-xl bg-purple-600 hover:bg-iuwe-blue text-white font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-copy"></i> <span>Duplicar Termo</span>
+                            </button>
+                            <button type="button" onclick="addNewBlankVocabItem()" class="px-2.5 py-1 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-plus"></i> <span>+ Personalizado</span>
+                            </button>
+                            <button type="button" onclick="removeCurrentVocabItem()" class="px-2 py-1 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 font-extrabold text-[10px] flex items-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="vc-item-tabs" class="flex flex-col gap-1.5"></div>
+                </div>
+
+                <!-- CAIXA DO TERMO ATUAL (ITENS 1 A 6 COMPLETOS) -->
+                <div class="bg-white border-2 border-iuwe-purpleBorder rounded-2xl p-3 space-y-3">
+                    <div class="flex items-center justify-between border-b border-iuwe-purpleBorder/50 pb-1.5 flex-wrap gap-1">
+                        <span id="editor-vocab-heading" class="text-xs font-extrabold text-slate-900">
+                            <i class="fa-solid fa-sliders text-purple-700 mr-1"></i>Configuração do Termo 1
+                        </span>
+                        <span class="text-[10px] font-bold text-purple-700">Personalize locutor, velocidade e até 3 idiomas</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-iuwe-purple/35 border border-iuwe-purpleBorder rounded-xl p-2.5">
+                        <div>
+                            <label for="vc-voice-select" class="text-[10px] font-extrabold text-slate-900 block mb-1">
+                                Voz IA:
+                            </label>
+                            <select id="vc-voice-select" onchange="updateCurrentVocabField('voice', this.value)" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2 py-1.5 text-xs font-bold text-slate-900">
+                                <option value="Zephyr">Zephyr (Feminina • Suave)</option>
+                                <option value="Aoede">Aoede (Feminina • Expressiva)</option>
+                                <option value="Kore">Kore (Feminina • Clara)</option>
+                                <option value="Leda">Leda (Feminina • Natural)</option>
+                                <option value="Puck">Puck (Masculina • Dinâmica)</option>
+                                <option value="Charon">Charon (Masculina • Grave)</option>
+                                <option value="Fenrir">Fenrir (Masculina • Forte)</option>
+                                <option value="Orus">Orus (Masculina • Calma)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="vc-speed-select" class="text-[10px] font-extrabold text-slate-900 block mb-1">
+                                Velocidade:
+                            </label>
+                            <select id="vc-speed-select" onchange="updateCurrentVocabField('speed', this.value)" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2 py-1.5 text-xs font-bold text-slate-900">
+                                <option value="0.6">0.6x (Bem Pausado)</option>
+                                <option value="0.8">0.8x (Lento p/ Estudo)</option>
+                                <option value="1.0" selected>1.0x (Natural)</option>
+                                <option value="1.2">1.2x (Fluido)</option>
+                                <option value="1.5">1.5x (Rápido)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="vc-note-input" class="text-[10px] font-extrabold text-slate-900 block mb-1">
+                                Dica / Nota de Uso:
+                            </label>
+                            <input id="vc-note-input" type="text" oninput="updateCurrentVocabField('usageNote', this.value)" placeholder="Ex: Expressão usada em reuniões..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs text-slate-900">
+                        </div>
+                    </div>
+
+                    <!-- IDIOMA PRINCIPAL DO TERMO -->
+                    <div class="bg-sky-50/75 border border-iuwe-blue/40 rounded-xl p-2.5 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <span class="px-2 py-0.5 rounded-md bg-purple-500 text-white font-extrabold text-[10px]">IDIOMA PRINCIPAL (TERMO + FRASE DE EXEMPLO)</span>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <label class="flex items-center gap-1 text-[10px] font-extrabold text-slate-900 cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-iuwe-blue/30">
+                                    <input id="vc-hide-primary-text" type="checkbox" checked onchange="updateCurrentVocabField('hidePrimaryText', this.checked)" class="rounded text-iuwe-blue">
+                                    <span><i class="fa-solid fa-eye-slash text-iuwe-blue mr-0.5"></i>Ocultar texto no card</span>
+                                </label>
+                                <label class="flex items-center gap-1 text-[10px] font-extrabold text-slate-900 cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-iuwe-blue/30">
+                                    <input id="vc-remove-primary-dictation" type="checkbox" onchange="updateCurrentVocabField('removePrimaryDictation', this.checked)" class="rounded text-rose-600">
+                                    <span><i class="fa-solid fa-ban text-rose-500 mr-0.5"></i>Remover Praticar Ditado</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div>
+                                <select id="vc-primary-lang" onchange="updateCurrentVocabField('primaryLang', this.value)" class="lang-select-populate w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900"></select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <input id="vc-primary-term" type="text" oninput="updateCurrentVocabField('primaryTerm', this.value)" placeholder="Palavra ou Expressão-Chave..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900">
+                            </div>
+                        </div>
+                        <textarea id="vc-primary-sentence" rows="2" oninput="updateCurrentVocabField('primarySentence', this.value)" placeholder="Frase de exemplo contextualizada no idioma principal..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900 resize-y"></textarea>
+                        <div class="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-iuwe-blue/20 text-[10px]">
+                            <span id="vc-primary-audio-status" class="font-bold text-slate-900">Áudio Principal: Não gerado</span>
+                            <div class="flex items-center gap-1.5">
+                                <button id="vc-btn-gen-primary-audio" type="button" onclick="generateCurrentVocabLangAudio('primary')" class="px-2.5 py-1 rounded-lg bg-iuwe-blue hover:bg-iuwe-sky text-white font-extrabold text-[10px] flex items-center gap-1">
+                                    <i id="vc-primary-audio-icon" class="fa-solid fa-microphone-lines"></i>
+                                    <span id="vc-primary-audio-label">Gerar Áudio (Idioma Principal)</span>
+                                </button>
+                                <button id="vc-btn-play-primary-audio" type="button" onclick="playCurrentVocabAudio('primary')" class="hidden px-2 py-1 rounded-lg bg-purple-100 text-purple-500 font-extrabold text-[10px] border border-sky-300">
+                                    <i class="fa-solid fa-play"></i> Ouvir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IDIOMA SECUNDÁRIO / TRADUÇÃO -->
+                    <div class="bg-purple-50/75 border border-purple-300 rounded-xl p-2.5 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <label class="flex items-center gap-1.5 cursor-pointer">
+                                <input id="vc-enable-secondary" type="checkbox" checked onchange="updateCurrentVocabField('enableSecondary', this.checked)" class="rounded text-purple-600">
+                                <span class="px-2 py-0.5 rounded-md bg-iuwe-blue text-white font-extrabold text-[10px]">IDIOMA SECUNDÁRIO / TRADUÇÃO (OPCIONAL)</span>
+                            </label>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <label class="flex items-center gap-1 text-[10px] font-extrabold text-slate-900 cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-purple-300">
+                                    <input id="vc-hide-secondary-text" type="checkbox" checked onchange="updateCurrentVocabField('hideSecondaryText', this.checked)" class="rounded text-purple-600">
+                                    <span><i class="fa-solid fa-eye-slash text-purple-600 mr-0.5"></i>Ocultar texto no card</span>
+                                </label>
+                                <label class="flex items-center gap-1 text-[10px] font-extrabold text-slate-900 cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-purple-300">
+                                    <input id="vc-remove-secondary-dictation" type="checkbox" onchange="updateCurrentVocabField('removeSecondaryDictation', this.checked)" class="rounded text-rose-600">
+                                    <span><i class="fa-solid fa-ban text-rose-500 mr-0.5"></i>Remover Praticar Ditado</span>
+                                </label>
+                                <button type="button" onclick="translateCurrentVocabTierFromPrimary('secondary')" class="px-2 py-0.5 rounded-lg bg-purple-600 hover:bg-iuwe-blue text-white font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Traduzir do Idioma Principal</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="vc-secondary-controls" class="space-y-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div>
+                                    <select id="vc-secondary-lang" onchange="onChangeVocabSecondaryLang(this.value)" class="lang-select-populate w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900"></select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <input id="vc-secondary-term" type="text" oninput="updateCurrentVocabField('secondaryTerm', this.value)" placeholder="Termo equivalente no 2º idioma..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900">
+                                </div>
+                            </div>
+                            <textarea id="vc-secondary-sentence" rows="2" oninput="updateCurrentVocabField('secondarySentence', this.value)" placeholder="Frase de exemplo traduzida no 2º idioma..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900 resize-y"></textarea>
+                            <div class="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-purple-200 text-[10px]">
+                                <span id="vc-secondary-audio-status" class="font-bold text-slate-900">Áudio Secundário (Opcional): Não gerado</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="vc-btn-gen-secondary-audio" type="button" onclick="generateCurrentVocabLangAudio('secondary')" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-iuwe-blue text-white font-extrabold text-[10px] flex items-center gap-1">
+                                        <i id="vc-secondary-audio-icon" class="fa-solid fa-microphone-lines"></i>
+                                        <span id="vc-secondary-audio-label">Gerar Áudio (Idioma Secundário)</span>
+                                    </button>
+                                    <button id="vc-btn-play-secondary-audio" type="button" onclick="playCurrentVocabAudio('secondary')" class="hidden px-2 py-1 rounded-lg bg-purple-100 text-purple-500 font-extrabold text-[10px] border border-sky-300">
+                                        <i class="fa-solid fa-play"></i> Ouvir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IDIOMA TERCIÁRIO / 3º IDIOMA -->
+                    <div class="bg-purple-50/75 border border-purple-300 rounded-xl p-2.5 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <label class="flex items-center gap-1.5 cursor-pointer">
+                                <input id="vc-enable-tertiary" type="checkbox" checked onchange="updateCurrentVocabField('enableTertiary', this.checked)" class="rounded text-sky-500">
+                                <span class="px-2 py-0.5 rounded-md bg-iuwe-blue text-white font-extrabold text-[10px]">IDIOMA TERCIÁRIO / 3º IDIOMA (OPCIONAL • MÁX 3)</span>
+                            </label>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <label class="flex items-center gap-1 text-[10px] font-extrabold text-teal-950 cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-iuwe-purpleBorder">
+                                    <input id="vc-hide-tertiary-text" type="checkbox" checked onchange="updateCurrentVocabField('hideTertiaryText', this.checked)" class="rounded text-sky-500">
+                                    <span><i class="fa-solid fa-eye-slash text-sky-500 mr-0.5"></i>Ocultar texto no card</span>
+                                </label>
+                                <label class="flex items-center gap-1 text-[10px] font-extrabold text-teal-950 cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-iuwe-purpleBorder">
+                                    <input id="vc-remove-tertiary-dictation" type="checkbox" onchange="updateCurrentVocabField('removeTertiaryDictation', this.checked)" class="rounded text-rose-600">
+                                    <span><i class="fa-solid fa-ban text-rose-500 mr-0.5"></i>Remover Praticar Ditado</span>
+                                </label>
+                                <button type="button" onclick="translateCurrentVocabTierFromPrimary('tertiary')" class="px-2 py-0.5 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Traduzir do Idioma Principal</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="vc-tertiary-controls" class="space-y-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div>
+                                    <select id="vc-tertiary-lang" onchange="onChangeVocabTertiaryLang(this.value)" class="lang-select-populate w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-teal-950"></select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <input id="vc-tertiary-term" type="text" oninput="updateCurrentVocabField('tertiaryTerm', this.value)" placeholder="Termo equivalente no 3º idioma..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900">
+                                </div>
+                            </div>
+                            <textarea id="vc-tertiary-sentence" rows="2" oninput="updateCurrentVocabField('tertiarySentence', this.value)" placeholder="Frase de exemplo traduzida no 3º idioma..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900 resize-y"></textarea>
+                            <div class="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-teal-200 text-[10px]">
+                                <span id="vc-tertiary-audio-status" class="font-bold text-slate-900">Áudio Terciário (Opcional): Não gerado</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="vc-btn-gen-tertiary-audio" type="button" onclick="generateCurrentVocabLangAudio('tertiary')" class="px-2.5 py-1 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-extrabold text-[10px] flex items-center gap-1">
+                                        <i id="vc-tertiary-audio-icon" class="fa-solid fa-microphone-lines"></i>
+                                        <span id="vc-tertiary-audio-label">Gerar Áudio (Idioma Terciário)</span>
+                                    </button>
+                                    <button id="vc-btn-play-tertiary-audio" type="button" onclick="playCurrentVocabAudio('tertiary')" class="hidden px-2 py-1 rounded-lg bg-purple-100 text-purple-500 font-extrabold text-[10px] border border-sky-300">
+                                        <i class="fa-solid fa-play"></i> Ouvir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PALCO INTERATIVO DO VOCABULÁRIO IA -->
+                <div class="border-t border-iuwe-purpleBorder/60 pt-3 space-y-2">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <span class="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-graduation-cap text-purple-700"></i> Palco de Estudo do Vocabulário:
+                        </span>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="navigateDraftVocab(-1)" class="px-2.5 py-1 rounded-xl bg-iuwe-purple hover:bg-iuwe-purpleMid text-slate-900 border border-iuwe-purpleBorder font-extrabold text-[11px]">
+                                <i class="fa-solid fa-chevron-left"></i> Anterior
+                            </button>
+                            <span id="stage-vocab-counter" class="text-[11px] font-extrabold text-purple-500 px-2">Termo 1 / 3</span>
+                            <button type="button" onclick="navigateDraftVocab(1)" class="px-2.5 py-1 rounded-xl bg-iuwe-purple hover:bg-iuwe-purpleMid text-slate-900 border border-iuwe-purpleBorder font-extrabold text-[11px]">
+                                Próximo <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="vocab-stage p-3.5 sm:p-4 text-white shadow-lg space-y-3">
+                        <div class="flex items-center justify-between gap-2 text-[10px] flex-wrap border-b border-white/15 pb-2">
+                            <span id="stage-vocab-theme" class="font-extrabold text-iuwe-teal">📚 Vocabulário IA</span>
+                            <div class="flex items-center gap-1.5">
+                                <span id="stage-vocab-voice-badge" class="px-2 py-0.5 rounded bg-white/15 text-purple-200 font-bold">🎙️ Zephyr (1.0x)</span>
+                                <span id="stage-vocab-badge" class="px-2 py-0.5 rounded bg-iuwe-blue text-white font-extrabold">TERMO 1</span>
+                            </div>
+                        </div>
+
+                        <div id="stage-vocab-note" class="text-[11px] text-amber-200 bg-white/10 border border-white/15 rounded-xl px-3 py-1.5 italic"></div>
+
+                        <div id="stage-vocab-languages-container" class="space-y-2"></div>
+                    </div>
+
+
+                    <!-- CAIXA DE SELEÇÃO DE COR DO FUNDO E DO TEXTO (VOCABULARIO) -->
+                    <div class="bg-iuwe-purple/40 border border-iuwe-purpleBorder rounded-2xl p-3 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <span class="text-[11px] font-extrabold text-slate-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-palette text-purple-600"></i>
+                                <span>Personalizar Cor do Fundo e do Texto:</span>
+                            </span>
+                            <span class="text-[10px] font-bold text-purple-700">Aplicado ao vivo no card, no Feed e no download .HTML</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+                            <div>
+                                <label for="vc-color-preset" class="text-[10px] font-extrabold text-slate-900 block mb-1">Combinações Harmônicas:</label>
+                                <select id="vc-color-preset" onchange="applyStudioColorCustomization('vocabulario', 'preset')" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-900">
+                                    <option value="noite_iuwe" >🌌 Noite Estelar IUWE (Escuro)</option>
+                                    <option value="lavanda_claro" >💜 Lavanda Suave IUWE (Claro)</option>
+                                    <option value="oceano_escuro" >🌊 Oceano Profundo (Escuro)</option>
+                                    <option value="gelo_claro" >❄️ Azul Gelo Canadense (Claro)</option>
+                                    <option value="esmeralda_escuro" selected>🌲 Floresta Esmeralda (Escuro)</option>
+                                    <option value="pergaminho_claro" >📜 Pergaminho Sépia (Claro)</option>
+                                    <option value="grafite_escuro" >🖤 Grafite Minimalista (Escuro)</option>
+                                    <option value="branco_classico" >🤍 Branco Clássico (Claro)</option>
+                                    <option value="custom">🎨 Cores Personalizadas</option>
+                                </select>
+                            </div>
+                            <div class="bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-2">
+                                <div>
+                                    <label for="vc-bg-color" class="text-[10px] font-extrabold text-slate-900 block">Cor do Fundo:</label>
+                                    <span id="vc-bg-hex-label" class="text-[10px] font-mono font-bold text-slate-500">#134E4A</span>
+                                </div>
+                                <input id="vc-bg-color" type="color" value="#134e4a" oninput="applyStudioColorCustomization('vocabulario', 'picker')" class="w-9 h-7 rounded cursor-pointer border border-slate-300 bg-transparent p-0">
+                            </div>
+                            <div class="bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-2">
+                                <div>
+                                    <label for="vc-text-color" class="text-[10px] font-extrabold text-slate-900 block">Cor do Texto:</label>
+                                    <span id="vc-text-hex-label" class="text-[10px] font-mono font-bold text-slate-500">#FFFFFF</span>
+                                </div>
+                                <input id="vc-text-color" type="color" value="#ffffff" oninput="applyStudioColorCustomization('vocabulario', 'picker')" class="w-9 h-7 rounded cursor-pointer border border-slate-300 bg-transparent p-0">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="api-cooldown-status-vc" class="rounded-xl px-3 py-1.5 text-[10.5px] font-bold bg-emerald-50/80 border border-emerald-200 text-emerald-900 flex items-center justify-between gap-2">
+                        <span><i class="fa-solid fa-shield-heart text-emerald-600 mr-1.5"></i>Proteção Anti-Bloqueio de API ativa: gere 1 áudio/tradução por vez (pausa automática de 8s entre cliques).</span>
+                    </div>
+                    <div class="pt-2">
+                        <button id="btn-post-vocab" type="button" onclick="postAndArchiveVocabulary()" class="w-full py-2.5 px-4 bg-gradient-to-r from-emerald-600 via-iuwe-blue to-purple-600 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5">
+                            <i id="post-vc-icon" class="fa-solid fa-cloud-arrow-up"></i>
+                            <span id="post-vc-label">Publicar Vocabulário IA no Feed</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VISÃO 5: GUIA CONFIGURAÇÕES (ID ÚNICO DE 8 DÍGITOS, RELATÓRIO, TAGS & SEGUIDORES) -->
+        <!-- =================================================================== -->
+        <section id="view-config-section" class="hidden space-y-3">
+            <!-- 1. Identidade Anônima de 8 Dígitos & Relatório de Criador -->
+            <div class="iuwe-card rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3">
+                <div class="flex items-center justify-between border-b border-iuwe-purpleBorder/60 pb-2 flex-wrap gap-2">
+                    <div class="space-y-1 flex-1 min-w-[200px]">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm sm:text-base font-extrabold text-purple-500 flex items-center gap-1.5">
+                                <i class="fa-solid fa-id-badge text-iuwe-blue"></i>
+                                <span>Identificação Única (ID 8 Dígitos) &amp; Preferências</span>
+                            </h2>
+                            <button type="button" onclick="toggleTabHelpSubtitle('config-main-subtitle')" class="w-5 h-5 rounded-full bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center text-[10px] font-extrabold cursor-pointer transition shrink-0" title="Como funciona esta guia?">
+                                <i class="fa-solid fa-question"></i>
+                            </button>
+                        </div>
+                        <p id="config-main-subtitle" class="hidden text-[11px] font-medium text-slate-900 bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-xl px-3 py-1.5">
+                            Para sua total privacidade e segurança jurídica, o sistema gera automaticamente um <b>ID numérico único de 8 dígitos</b> para seu perfil. Não há chat nem exposição de dados pessoais — apenas compartilhamento de materiais, contagem de seguidores e downloads.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <button type="button" onclick="exportCreatorImpactReportHtml()" class="px-3 py-1.5 rounded-xl bg-iuwe-blue hover:bg-iuwe-sky text-white font-extrabold text-xs shadow-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-line"></i> <span>Baixar Meu Report</span>
+                        </button>
+                        <button type="button" onclick="saveUserProfileConfig()" class="px-3 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-extrabold text-xs shadow-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk"></i> <span>Salvar Preferências</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div>
+                        <label class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Seu ID Único (8 Dígitos):</label>
+                        <div class="flex items-center gap-1.5">
+                            <input id="cfg-user-handle" type="text" readonly value="@00000000" class="w-full bg-iuwe-purple/40 border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-iuwe-blue font-mono select-all cursor-pointer" title="ID único de 8 dígitos">
+                            <button type="button" onclick="copyMyUniqueUserId()" class="px-2.5 py-1.5 rounded-xl bg-iuwe-purple hover:bg-iuwe-purpleMid border border-iuwe-purpleBorder text-xs font-extrabold text-purple-700 shrink-0 cursor-pointer" title="Copiar ID">📋 Copiar</button>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="text-[10px] font-extrabold text-slate-900 block mb-0.5">☁️ Sincronização do Histórico &amp; Itens Salvos (Conta Google Opcional):</label>
+                        <div class="flex items-center gap-1.5">
+                            <input id="cfg-hybrid-google-status" type="text" readonly value="Modo Visitante Local" class="w-full bg-sky-50 border border-sky-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 font-mono">
+                            <button id="cfg-hybrid-sync-btn" type="button" onclick="openHybridGoogleAuthModal('Conecte sua Conta Google para sincronizar suas preferências, tags seguidas e histórico em qualquer dispositivo.')" class="px-3 py-1.5 rounded-xl bg-iuwe-blue hover:bg-iuwe-sky text-white text-xs font-extrabold shrink-0 cursor-pointer">☁️ Conectar Google</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Idioma Nativo:</label>
+                        <select id="cfg-native-lang" class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900">
+                            <option value="🇧🇷 Português (BR)" selected>🇧🇷 Português (BR)</option>
+                            <option value="🇺🇸 Inglês (EUA)">🇺🇸 Inglês (EUA)</option>
+                            <option value="🇨🇦 Inglês Canadense">🇨🇦 Inglês Canadense</option>
+                            <option value="🇨🇦 Francês Québécois">🇨🇦 Francês Québécois</option>
+                            <option value="🌎 Espanhol">🌎 Espanhol</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-extrabold text-slate-900 block mb-0.5">Idiomas que Pratica / Estuda:</label>
+                        <input id="cfg-learning-langs" type="text" value="" placeholder="Ex: Inglês, Francês..." class="w-full bg-white border border-iuwe-purpleBorder rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900">
+                    </div>
+                </div>
+
+                <!-- Recomendação de Segurança: Uso de Gmail Dedicado com Senha Exclusiva + Verificação em Duas Etapas (2FA) -->
+                <div class="bg-purple-50/90 border-2 border-purple-300 rounded-2xl p-3 space-y-1.5 text-xs">
+                    <div class="font-extrabold text-slate-900 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-shield text-purple-700"></i>
+                        <span>Proteção de Privacidade, E-mail Criptografado (RSA-OAEP) &amp; Gmail Dedicado com 2FA</span>
+                    </div>
+                    <p class="text-[10.5px] text-slate-800 leading-relaxed font-medium">
+                        No Feed Público, criadores são identificados exclusivamente pelo <b>ID numérico de 8 dígitos</b>. Caso você opte por conectar sua Conta Google para sincronizar seu histórico e itens salvos na nuvem, seu e-mail é <b>retido no banco exclusivamente de forma criptografada (Chave Pública RSA-OAEP 2048-bit + Índice Cego SHA-256)</b>, jamais em texto limpo. Para usar o Google AI Studio e o login na nuvem, recomendamos um <b>Gmail dedicado aos estudos, com senha exclusiva e Verificação em Duas Etapas (2FA) ativada</b>. Consulte o <a href="guia.html" class="underline font-extrabold text-iuwe-blue">Guia de Uso &amp; Segurança</a>.
+                    </p>
+                </div>
+
+                <!-- Termos Claros de Aceite, Privacidade (LGPD) e Registro de Perfil -->
+                <div class="bg-iuwe-purple/60 border-2 border-iuwe-purpleBorder rounded-2xl p-3.5 space-y-2.5 text-xs">
+                    <div class="flex items-center justify-between flex-wrap gap-1 border-b border-iuwe-purpleBorder pb-1.5">
+                        <span class="font-extrabold text-slate-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-signature text-iuwe-blue"></i>
+                            <span>Termos de Aceite, Uso Responsável e Privacidade (LGPD — Lei 13.709/2018)</span>
+                        </span>
+                        <a href="guia.html#termos-aceite" class="text-[10px] font-extrabold text-iuwe-blue hover:underline">Ler Termos Completos no Guia ➔</a>
+                    </div>
+
+                    <label class="flex items-start gap-2.5 cursor-pointer bg-white border border-iuwe-purpleBorder rounded-xl p-2.5 hover:border-iuwe-blue transition">
+                        <input id="cfg-terms-lgpd-ack" type="checkbox" checked onchange="saveUserProfileConfig()" class="rounded text-iuwe-blue w-4 h-4 mt-0.5 flex-shrink-0">
+                        <span class="text-[10.5px] text-slate-900 leading-relaxed font-medium">
+                            <b class="text-slate-900">Aceite de Privacidade LGPD, Retenção Criptografada de E-mail &amp; ID de 8 Dígitos (Obrigatório):</b> Estou ciente de que minha autoria pública no Feed é representada pelo meu ID numérico de 8 dígitos, que ao conectar minha Conta Google meu endereço de e-mail fica retido no banco de dados <b>exclusivamente sob criptografia assimétrica (RSA-OAEP 2048-bit e hash cego SHA-256, sem exposição pública)</b>, e que postagens excluídas permanecem na lixeira por 30 dias corridos.
+                        </span>
+                    </label>
+
+                    <label class="flex items-start gap-2.5 cursor-pointer bg-white border border-iuwe-purpleBorder rounded-xl p-2.5 hover:border-iuwe-blue transition">
+                        <input id="cfg-terms-dedicated-gmail-ack" type="checkbox" checked onchange="saveUserProfileConfig()" class="rounded text-purple-700 w-4 h-4 mt-0.5 flex-shrink-0">
+                        <span class="text-[10.5px] text-slate-900 leading-relaxed font-medium">
+                            <b class="text-slate-900">Ciência de Segurança Operacional, Gmail Dedicado e Verificação em Duas Etapas — 2FA (Obrigatório):</b> Declaro ciência da recomendação de utilizar um <b>Gmail dedicado exclusivamente aos estudos, com senha única e Verificação em Duas Etapas (2FA) ativada</b>, e comprometo-me a nunca compartilhar chaves de API ou dados sensíveis em materiais públicos.
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 2. Preferências de Tags Seguidas & Autores Seguidos -->
+            <div class="iuwe-card rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3">
+                <h3 class="text-xs sm:text-sm font-extrabold text-purple-500 flex items-center gap-1.5 border-b border-iuwe-purpleBorder/60 pb-2">
+                    <i class="fa-solid fa-hashtag text-iuwe-blue"></i>
+                    <span>Minhas Tags Seguidas &amp; Autores que Sigo</span>
+                </h3>
+
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <span class="text-xs font-extrabold text-slate-900">Tags que você segue (clique em qualquer #tag nos posts ou abaixo para alternar):</span>
+                        <div class="flex items-center gap-1">
+                            <input id="new-follow-tag-input" type="text" placeholder="Nova #tag..." class="bg-iuwe-purple/40 border border-iuwe-purpleBorder rounded-lg px-2 py-1 text-xs font-bold w-32">
+                            <button type="button" onclick="addCustomFollowedTag()" class="px-2.5 py-1 rounded-lg bg-purple-500 text-white font-extrabold text-xs">+ Seguir Tag</button>
+                        </div>
+                    </div>
+                    <div id="config-followed-tags-box" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-iuwe-purpleBorder/50">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <span class="text-xs font-extrabold text-slate-900">IDs de Criadores que você segue (8 dígitos):</span>
+                        <div class="flex items-center gap-1">
+                            <input id="new-follow-userid-input" type="text" maxlength="9" placeholder="Ex: 48291037" class="bg-iuwe-purple/40 border border-iuwe-purpleBorder rounded-lg px-2 py-1 text-xs font-bold font-mono w-32">
+                            <button type="button" onclick="addCustomFollowedUserId()" class="px-2.5 py-1 rounded-lg bg-iuwe-blue text-white font-extrabold text-xs">+ Seguir ID</button>
+                        </div>
+                    </div>
+                    <div id="config-followed-users-box" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-iuwe-purpleBorder/50">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <span class="text-xs font-extrabold text-rose-800"><i class="fa-solid fa-ban mr-1"></i>Tags Bloqueadas (Ocultam posts do Feed):</span>
+                        <div class="flex items-center gap-1">
+                            <input id="new-blocked-tag-input" type="text" placeholder="Ex: #girias" class="bg-rose-50 border border-rose-200 rounded-lg px-2 py-1 text-xs font-bold w-32">
+                            <button type="button" onclick="addCustomBlockedTag()" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-extrabold text-xs">Bloquear Tag</button>
+                        </div>
+                    </div>
+                    <div id="config-blocked-tags-box" class="flex flex-wrap gap-1.5"></div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+    <script>window.IUWE_INITIAL_TAB = "public";</script>
+    <script src="iuwe-core.js"></script>
+</body>
+</html>

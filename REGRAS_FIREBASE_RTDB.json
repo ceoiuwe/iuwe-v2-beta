@@ -1,0 +1,85 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "posts": {
+      ".read": true,
+      ".indexOn": [
+        "timestampMs",
+        "authorHandle"
+      ],
+      "$archiveId": {
+        ".write": "!data.exists() || (auth != null && data.child('authorAuthUid').val() === auth.uid) || (!data.child('authorTokenHash').exists() || data.child('authorTokenHash').val() === newData.child('authorTokenHash').val()) || newData.exists()",
+        ".validate": "newData.hasChildren(['archiveId'])"
+      }
+    },
+    "post_payloads": {
+      ".read": true,
+      "$archiveId": {
+        ".write": "!data.exists() || newData.exists()"
+      },
+      ".indexOn": [
+        "archiveId",
+        "updatedAtIso"
+      ]
+    },
+    "audiocasts": {
+      ".read": true,
+      ".indexOn": [
+        "timestampMs",
+        "authorHandle"
+      ],
+      "$archiveId": {
+        ".write": "!data.exists() || (auth != null && data.child('authorAuthUid').val() === auth.uid) || (!data.child('authorTokenHash').exists() || data.child('authorTokenHash').val() === newData.child('authorTokenHash').val()) || newData.exists()"
+      }
+    },
+    "audiocast_streams": {
+      ".read": true,
+      "$archiveId": {
+        ".write": "!data.exists() || newData.exists()"
+      },
+      ".indexOn": [
+        "archiveId",
+        "updatedAtIso"
+      ]
+    },
+    "creator_metrics_v2": {
+      ".read": true,
+      ".write": true
+    },
+    "kyc_verified_users": {
+      ".read": false,
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "auth_identities": {
+      ".read": false,
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "users": {
+      ".read": false,
+      "$handleKey": {
+        ".read": true,
+        ".write": "!data.exists() || auth != null || (!data.child('authorTokenHash').exists() || data.child('authorTokenHash').val() === newData.child('authorTokenHash').val())"
+      }
+    },
+    "social_graph": {
+      ".read": false,
+      "$handleKey": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "custody_audit_log": {
+      ".read": false,
+      "$logId": {
+        ".write": "!data.exists()"
+      }
+    }
+  }
+}

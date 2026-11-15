@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre a IUWE v2.0 — I learn, yoU learn, We learn | Comunidade & Estúdio 4 Formatos</title>
+    <link rel="icon" type="image/jpeg" href="IUWE-favicon.jpeg">
+    <link rel="apple-touch-icon" href="IUWE-favicon.jpeg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                    colors: {
+                        iuwe: {
+                            blue: '#42A5FF',         // Light Blue Oficial (Fontes Pequenas, Subtítulos e Ícones)
+                            sky: '#3CB9EF',          // Azul Céu
+                            cyan: '#83EDFF',         // Ciano Suave
+                            ice: '#AEDDFF',          // Azul Gelo Claro
+                            teal: '#6DDDD0',         // Menta do Clipe Oficial
+                            pink: '#FFD4D4',         // Rosa Suave do Clipe Oficial
+                            purple: '#FFF1FF',       // Light Purple (Canvas Principal)
+                            purpleMid: '#F8DCFF',    // Light Purple Médio
+                            purpleBorder: '#E9BFF8', // Borda Light Purple
+                            purpleTitle: '#A855F7',  // Light/Medium Purple (Fontes Grandes e Frases Chamativas)
+                            peach: '#FFE4CE'
+                        },
+                        sdg: {
+                            four: '#C5192D',
+                            eight: '#A21942',
+                            nine: '#FD6925',
+                            ten: '#DD1367'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #FFF1FF;
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(248, 220, 255, 0.75) 0px, transparent 50%),
+                radial-gradient(at 90% 85%, rgba(174, 221, 255, 0.45) 0px, transparent 50%);
+            scroll-behavior: smooth;
+        }
+        .iuwe-card {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            border: 2px solid #E9BFF8;
+        }
+    
+        html.dark-mode [class*="text-rose-"],
+        html.dark-mode [class*="text-red-"] {
+            color: #F8FAFC !important;
+        }
+        html.dark-mode [class*="bg-rose-50"],
+        html.dark-mode [class*="bg-red-50"] {
+            background-color: rgba(175, 95, 248, 0.14) !important;
+            border-color: rgba(175, 95, 248, 0.40) !important;
+            color: #F8FAFC !important;
+        }
+
+    </style>
+        <style id="iuwe-contrast-and-darkmode-style">
+        /* =====================================================================
+           REGRA DE CONTRASTE IUWE:
+           - Light Purple (#A855F7) e Light Blue (#42A5FF) APENAS em Cabeçalhos,
+             Títulos (h1-h4, .iuwe-title) e Subtítulos (.iuwe-subtitle).
+           - Todo o resto do texto (parágrafos, listas, negritos inline, inputs,
+             descrições) em PRETO BÁSICO (#111827) no Light Mode e BRANCO (#F8FAFC)
+             no Dark Mode para leitura limpa e alto contraste.
+           ===================================================================== */
+        body {
+            color: #111827 !important;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        p, li, td, th, label, input, select, textarea, blockquote {
+            color: #111827;
+        }
+        p strong, p b, li strong, li b, td strong, blockquote strong {
+            color: #000000 !important;
+            font-weight: 700;
+        }
+
+        /* =====================================================================
+           DARK MODE COMPLETO E TRANSLÚCIDO (html.dark-mode)
+           - Captura todas as variações de opacidade (/30, /40, /50, /70, /80, etc.)
+           ===================================================================== */
+        html.dark-mode,
+        html.dark-mode body {
+            background-color: #09090E !important;
+            background-image:
+                radial-gradient(at 10% 10%, rgba(107, 33, 168, 0.20) 0px, transparent 50%),
+                radial-gradient(at 90% 85%, rgba(56, 189, 248, 0.10) 0px, transparent 50%) !important;
+            color: #F8FAFC !important;
+        }
+        html.dark-mode .iuwe-card,
+        html.dark-mode [class*="bg-white"] {
+            background-color: #12121B !important;
+            border-color: rgba(192, 132, 252, 0.24) !important;
+            color: #F8FAFC !important;
+            box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.65) !important;
+        }
+        /* Caixas internas e sub-barras ficam translúcidas no modo escuro para zero dissonância */
+        html.dark-mode [class*="bg-iuwe-purple"],
+        html.dark-mode [class*="bg-purple-50"],
+        html.dark-mode [class*="bg-purple-100"],
+        html.dark-mode [class*="bg-purple-200"],
+        html.dark-mode [class*="bg-sky-50"],
+        html.dark-mode [class*="bg-sky-100"],
+        html.dark-mode [class*="bg-iuwe-ice"],
+        html.dark-mode [class*="bg-iuwe-peach"],
+        html.dark-mode [class*="bg-rose-50"],
+        html.dark-mode [class*="bg-amber-50"],
+        html.dark-mode [class*="bg-emerald-50"],
+        html.dark-mode [class*="bg-slate-50"],
+        html.dark-mode [class*="bg-slate-100"] {
+            background-color: rgba(255, 255, 255, 0.04) !important;
+            border-color: rgba(192, 132, 252, 0.22) !important;
+            color: #F8FAFC !important;
+        }
+        html.dark-mode #header-more-dropdown,
+        html.dark-mode .multi-filter-dropdown > div {
+            background-color: #161622 !important;
+            border-color: rgba(192, 132, 252, 0.35) !important;
+        }
+        html.dark-mode .flashcard-front,
+        html.dark-mode .flashcard-back {
+            background: linear-gradient(135deg, #181826 0%, #1f1934 60%, #152238 100%) !important;
+            color: #F8FAFC !important;
+        }
+        html.dark-mode p,
+        html.dark-mode li,
+        html.dark-mode [class*="text-slate-"] {
+            color: #E2E8F0 !important;
+        }
+        html.dark-mode p strong,
+        html.dark-mode p b,
+        html.dark-mode li strong,
+        html.dark-mode li b,
+        html.dark-mode blockquote strong {
+            color: #FFFFFF !important;
+        }
+        /* Títulos e Subtítulos no Dark Mode permanecem Light Purple e Light Blue luminosos */
+        html.dark-mode h1,
+        html.dark-mode h2,
+        html.dark-mode h3,
+        html.dark-mode .text-purple-500,
+        html.dark-mode .text-purple-600,
+        html.dark-mode .text-purple-700 {
+            color: #C084FC !important;
+        }
+        html.dark-mode .text-iuwe-blue,
+        html.dark-mode .text-sky-500,
+        html.dark-mode .text-black {
+            color: #7DD3FC !important;
+        }
+        html.dark-mode .text-sky-900 {
+            color: #38BDF8 !important;
+        }
+        html.dark-mode input,
+        html.dark-mode select,
+        html.dark-mode textarea {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border-color: rgba(192, 132, 252, 0.28) !important;
+            color: #FFFFFF !important;
+        }
+        html.dark-mode #btn-toggle-free-audio,
+        html.dark-mode #btn-toggle-free-audio span,
+        html.dark-mode #btn-toggle-free-audio i {
+            color: #FFFFFF !important;
+        }
+        /* =====================================================================
+           CAIXAS SELECIONADAS (ABAS, SUB-ABAS, FERRAMENTAS E PÍLULAS ATIVAS)
+           - .iuwe-selected-blue: Fundo Light Blue (#42A5FF) com letras em White (#FFFFFF)
+           - .iuwe-selected-white: No Dark Mode, Fundo White (#FFFFFF) com letras em
+             Light Purple (#9333EA) ou Light Blue (#0284C7) para alto destaque!
+           ===================================================================== */
+        .iuwe-selected-blue,
+        html.dark-mode .iuwe-selected-blue {
+            background-color: #42A5FF !important;
+            border-color: #7DD3FC !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 14px -2px rgba(66, 165, 255, 0.45) !important;
+        }
+        .iuwe-selected-blue span,
+        .iuwe-selected-blue i,
+        .iuwe-selected-blue div,
+        html.dark-mode .iuwe-selected-blue span,
+        html.dark-mode .iuwe-selected-blue i,
+        html.dark-mode .iuwe-selected-blue div {
+            color: #FFFFFF !important;
+        }
+
+        .iuwe-selected-white {
+            background-color: #A855F7 !important;
+            border-color: #9333EA !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 3px 10px -2px rgba(168, 85, 247, 0.35) !important;
+        }
+        .iuwe-selected-white span,
+        .iuwe-selected-white i {
+            color: #FFFFFF !important;
+        }
+        html.dark-mode .iuwe-selected-white {
+            background-color: #FFFFFF !important;
+            border-color: #E9BFF8 !important;
+            color: #9333EA !important;
+            box-shadow: 0 4px 14px -2px rgba(255, 255, 255, 0.28) !important;
+        }
+        html.dark-mode .iuwe-selected-white span {
+            color: #0284C7 !important;
+            font-weight: 800 !important;
+        }
+        html.dark-mode .iuwe-selected-white i {
+            color: #9333EA !important;
+        }
+        html.dark-mode .logo-frame-box {
+            background-color: #000000 !important;
+            border-color: rgba(192, 132, 252, 0.30) !important;
+        }
+    </style>
+    <!-- Motor Compartilhado IUWE Core (Opção A) carregado ao final do body -->
+    <!-- SDK Oficial Firebase (App + Authentication OAuth 2.0 Google - Carregamento Único) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body class="text-slate-900 font-sans antialiased selection:bg-purple-400 selection:text-white pb-12">
+
+    <!-- ======================================================================= -->
+    <!-- MODAL HÍBRIDO DE LOGIN GOOGLE (ACIONADO AO SALVAR, VER HISTÓRICO OU SINCRONIZAR) -->
+    <!-- Nunca trava a plataforma: o usuário pode fechar e continuar no Estúdio Aberto -->
+    <!-- ======================================================================= -->
+    <div id="iuwe-hybrid-auth-modal" class="fixed inset-0 bg-purple-950/75 backdrop-blur-sm z-50 hidden items-center justify-center p-3 overflow-y-auto">
+        <div class="iuwe-card bg-white border-2 border-iuwe-purpleBorder rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 my-auto">
+            <div class="flex items-center justify-between gap-2 border-b border-iuwe-purpleBorder/60 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-9 h-9 rounded-2xl bg-iuwe-purple border border-iuwe-purpleBorder flex items-center justify-center text-purple-600 shadow-2xs">
+                        <i class="fa-brands fa-google text-base"></i>
+                    </span>
+                    <div>
+                        <span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-300 font-extrabold text-[9px] uppercase tracking-wider">☁️ Sincronização na Nuvem &amp; Histórico</span>
+                        <h2 class="text-sm sm:text-base font-extrabold text-slate-900 mt-0.5">Conecte sua Conta Google</h2>
+                    </div>
+                </div>
+                <button type="button" onclick="closeHybridGoogleAuthModal()" class="w-8 h-8 rounded-full bg-iuwe-purple hover:bg-iuwe-purpleMid text-purple-700 flex items-center justify-center font-extrabold cursor-pointer" title="Fechar e continuar no modo visitante">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Motivo contextual que abriu o modal (ex: Salvar Post, Histórico Pessoal, Sincronizar Perfil) -->
+            <div id="hybrid-auth-reason-banner" class="bg-sky-50 border border-sky-200 rounded-2xl p-3 text-xs font-bold text-slate-800 flex items-start gap-2">
+                <i class="fa-solid fa-bookmark text-iuwe-blue mt-0.5"></i>
+                <span id="hybrid-auth-reason-text">Para salvar itens na sua biblioteca pessoal e manter o histórico de tudo o que você produz em qualquer dispositivo, conecte sua Conta Google.</span>
+            </div>
+
+            <div class="bg-iuwe-purple/50 border border-iuwe-purpleBorder rounded-2xl p-3 space-y-1.5 text-[11px] text-slate-800">
+                <div class="font-extrabold text-purple-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved text-iuwe-blue"></i>
+                    <span>Privacidade Garantida (LGPD) • Seu E-mail Nunca Aparece no Feed</span>
+                </div>
+                <ul class="list-disc pl-4 space-y-1 font-medium text-[10.5px]">
+                    <li><b>Mesmo ID Anônimo no Feed:</b> Publicamente você continua identificado apenas pelo seu código de 8 dígitos (<code id="hybrid-modal-preview-handle" class="font-mono font-extrabold text-iuwe-blue">@00000000</code>).</li>
+                    <li><b>Biblioteca Salva &amp; Histórico Blindado:</b> Seus posts criados, downloads, seguidores e itens salvos ficam vinculados à sua conta Google para abrir no celular ou no PC.</li>
+                </ul>
+            </div>
+
+            <label class="flex items-start gap-2.5 cursor-pointer bg-iuwe-purple/35 border border-iuwe-purpleBorder rounded-xl p-2.5 hover:border-iuwe-blue transition">
+                <input id="hybrid-auth-lgpd-check" type="checkbox" checked class="rounded text-iuwe-blue w-4 h-4 mt-0.5 flex-shrink-0">
+                <span class="text-[10.5px] text-slate-900 leading-relaxed font-semibold">
+                    Concordo com os <b>Termos de Privacidade (LGPD)</b> e autorizo o vínculo da minha Conta Google ao meu ID de 8 dígitos para salvar meu histórico e receber atualizações da IUWE.
+                </span>
+            </label>
+
+            <div id="hybrid-auth-error-msg" class="hidden rounded-xl bg-rose-50 border border-rose-300 px-3 py-2 text-[11px] font-extrabold text-rose-700"></div>
+
+            <div class="space-y-2">
+                <button id="btn-hybrid-google-login" type="button" onclick="signInWithGoogleHybridPopup()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-iuwe-blue to-purple-600 hover:from-sky-500 hover:to-purple-700 text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2.5 cursor-pointer transition">
+                    <i class="fa-brands fa-google text-base"></i>
+                    <span>Entrar com Conta Google (Salvar Meu Histórico)</span>
+                </button>
+
+                <div class="flex items-center justify-between gap-2 pt-1">
+                    <button type="button" onclick="closeHybridGoogleAuthModal()" class="text-[11px] font-extrabold text-slate-500 hover:text-slate-800 underline cursor-pointer">
+                        Continuar usando como visitante sem salvar na nuvem
+                    </button>
+                    <button type="button" onclick="togglePortableKeySubbox()" class="text-[10.5px] font-extrabold text-purple-600 hover:underline cursor-pointer">
+                        🔑 Usar Chave de Código
+                    </button>
+                </div>
+
+                <!-- Subcaixa opcional de Código de Transferência caso o navegador bloqueie pop-ups -->
+                <div id="hybrid-portable-key-subbox" class="hidden rounded-2xl bg-purple-50 border border-purple-200 p-3 space-y-2 text-[10.5px] mt-1">
+                    <div class="font-extrabold text-purple-800">🔑 Código Portátil do ID (Alternativa sem Pop-up)</div>
+                    <div class="flex items-center gap-1.5">
+                        <input id="modal-portable-code-display" type="text" readonly value="IUWE-..." class="w-full bg-white border border-purple-300 rounded-lg px-2 py-1 text-[10px] font-mono font-bold text-slate-800 select-all">
+                        <button type="button" onclick="copyMyPortableAccessCode()" class="px-2.5 py-1 rounded-lg bg-iuwe-blue text-white font-extrabold shrink-0 cursor-pointer">Copiar</button>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <input id="modal-import-portable-code-input" type="text" placeholder="Colar código IUWE-12345678-iuwe_sec_..." class="w-full bg-white border border-purple-300 rounded-lg px-2 py-1 text-[10px] font-mono text-slate-900">
+                        <button type="button" onclick="importPortableAccessCodeFromInput('modal-import-portable-code-input')" class="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-extrabold shrink-0 cursor-pointer">Restaurar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-4 space-y-6 sm:space-y-7">
+
+                <!-- BARRA DE NAVEGAÇÃO UNIFICADA IUWE v2.0 (NÃO FIXA AO TOPO • SOME AO ROLAR PARA BAIXO) -->
+        <nav class="iuwe-card rounded-3xl p-3 sm:p-4 shadow-md shadow-purple-200/30 space-y-2.5 relative z-30">
+            <!-- LINHA 1: LOGO + ENTRAR P/ SALVAR À ESQUERDA | DARK MODE NO CENTRO | @ID + MENU TRÊS TRAÇOS À DIREITA -->
+            <div class="w-full flex items-center justify-between gap-2 flex-wrap">
+                <!-- Esquerda: Logo + Entrar p/ Salvar -->
+                <div class="flex items-center gap-2">
+                    <a href="index.html" class="flex items-center group shrink-0" title="Voltar ao Feed Público">
+                        <img src="data:image/webp;base64,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" data-iuwe-logo="full" alt="IUWE - I learn, yoU learn, We learn" class="logo-frame-box h-10 sm:h-11 w-auto rounded-xl border border-iuwe-purpleBorder bg-white px-2.5 py-1 shadow-2xs object-contain">
+                    </a>
+                    <!-- Status Híbrido: Visitante Aberto ou Conta Google Verificada -->
+                    <button id="header-hybrid-login-btn" type="button" onclick="openHybridGoogleAuthModal('Conecte sua Conta Google para salvar seus itens favoritos, manter seu histórico de criação na nuvem e sincronizar seu ID de 8 dígitos em qualquer aparelho.')" class="px-3 py-1.5 rounded-full bg-gradient-to-r from-iuwe-blue to-purple-600 hover:opacity-95 text-white font-extrabold text-[11px] flex items-center gap-1.5 shadow-xs cursor-pointer transition whitespace-nowrap" title="Conectar Conta Google para salvar histórico e biblioteca na nuvem">
+                        <i class="fa-brands fa-google"></i>
+                        <span>Entrar p/ Salvar</span>
+                    </button>
+                    <div id="header-hybrid-verified-badge" class="hidden px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 font-extrabold text-[11px] items-center gap-1.5 shadow-2xs whitespace-nowrap" title="Conta Google verificada e sincronizada na nuvem">
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                        <span id="header-hybrid-verified-text" class="font-mono">Google ✓</span>
+                    </div>
+                    <button id="header-hybrid-logout-btn" type="button" onclick="logoutHybridGoogleSession()" class="hidden px-2.5 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-extrabold text-[11px] items-center gap-1 cursor-pointer transition shadow-2xs" title="Desconectar Conta Google e voltar ao modo visitante">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span class="hidden sm:inline">Sair</span>
+                    </button>
+                </div>
+
+                <!-- Centro: Botão Largo Dark Mode / Light Mode -->
+                <div class="flex-1 max-w-[260px] min-w-[140px] mx-auto">
+                    <button type="button" onclick="toggleIuweThemeMode()" class="btn-theme-toggle-ui w-full py-1.5 px-4 rounded-2xl bg-white hover:bg-iuwe-purple text-slate-900 border border-iuwe-purpleBorder font-extrabold text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-2xs">
+                        <i class="fa-solid fa-moon text-purple-500"></i> <span>Dark Mode</span>
+                    </button>
+                </div>
+
+                <!-- Direita: Pílula @ID + Botão Três Traços (Menu Mais Opções com Sobre, Fato Curioso, Metas da ONU e Guia) -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <a href="perfil.html" class="px-3 py-1.5 rounded-full bg-iuwe-purple hover:bg-iuwe-purpleMid text-iuwe-blue border border-iuwe-purpleBorder font-extrabold text-xs flex items-center gap-1.5 shadow-2xs transition" title="Abrir Perfil &amp; #Tags">
+                        <i class="fa-solid fa-circle-user text-purple-500"></i>
+                        <span id="header-active-handle" class="font-mono">@visitante</span>
+                    </a>
+
+                    <div class="relative" id="header-more-menu-wrapper">
+                        <button id="btn-header-more-menu" type="button" onclick="toggleHeaderMoreMenu(event)" class="w-9 h-9 rounded-2xl bg-white hover:bg-iuwe-purple text-slate-900 border border-iuwe-purpleBorder flex items-center justify-center shadow-2xs cursor-pointer transition" title="Menu Institucional (Sobre, Fato Curioso, Metas da ONU, Guia de Uso e Perfil)">
+                            <i class="fa-solid fa-bars text-sm text-purple-500"></i>
+                        </button>
+                        <div id="header-more-dropdown" class="hidden absolute right-0 mt-1.5 w-64 rounded-2xl iuwe-card bg-white border-2 border-iuwe-purpleBorder shadow-xl p-1.5 z-50 space-y-1 text-xs font-extrabold">
+                            <a href="sobre.html" class="iuwe-selected-blue flex items-center gap-2.5 px-3 py-2 rounded-xl font-extrabold transition shadow-xs">
+                                <i class="fa-solid fa-compass text-purple-500 w-4 text-center"></i>
+                                <span>Sobre</span>
+                            </a>
+                            <a href="Fato_Curioso.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-iuwe-purple text-slate-900 transition">
+                                <i class="fa-solid fa-lightbulb text-iuwe-blue w-4 text-center"></i>
+                                <span>Fato Curioso</span>
+                            </a>
+                            <a href="metas-onu.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-iuwe-purple text-slate-900 transition">
+                                <i class="fa-solid fa-earth-americas text-iuwe-blue w-4 text-center"></i>
+                                <span>Metas da ONU</span>
+                            </a>
+                            <a href="guia.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-iuwe-purple text-slate-900 transition">
+                                <i class="fa-solid fa-shield-halved text-purple-500 w-4 text-center"></i>
+                                <span>Guia de Uso &amp; Segurança</span>
+                            </a>
+                            <div class="border-t border-iuwe-purpleBorder/60 my-1"></div>
+                            <a href="perfil.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-iuwe-purple text-slate-900 transition">
+                                <i class="fa-solid fa-sliders text-purple-500 w-4 text-center"></i>
+                                <span>Perfil &amp; #Tags</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LINHA 2: 4 ABAS PRINCIPAIS DO APLICATIVO (PÚBLICO, PESSOAL, CRIAR, SALVOS) -->
+            <div class="w-full grid grid-cols-4 gap-1.5 p-1 rounded-2xl bg-iuwe-purple/50 border border-iuwe-purpleBorder text-[11px] sm:text-xs font-extrabold">
+                <a href="index.html" class="py-2 px-2 rounded-xl bg-white hover:bg-iuwe-blue hover:text-white text-slate-900 border border-iuwe-purpleBorder flex items-center justify-center gap-1.5 transition shadow-2xs">
+                    <i class="fa-solid fa-earth-americas text-iuwe-blue"></i>
+                    <span>Público</span>
+                    <span id="badge-count-public" class="px-1.5 py-0.2 rounded-full bg-iuwe-blue text-white text-[9.5px]">5</span>
+                </a>
+                <a href="pessoal.html" class="py-2 px-2 rounded-xl bg-white hover:bg-iuwe-blue hover:text-white text-slate-900 border border-iuwe-purpleBorder flex items-center justify-center gap-1.5 transition shadow-2xs">
+                    <i class="fa-solid fa-user-check text-purple-500"></i>
+                    <span>Pessoal</span>
+                    <span id="badge-count-personal" class="px-1.5 py-0.2 rounded-full bg-purple-200 text-purple-800 text-[9.5px]">0</span>
+                </a>
+                <a href="criar.html" class="py-2 px-2 rounded-xl bg-white hover:bg-iuwe-blue hover:text-white text-iuwe-blue border border-iuwe-purpleBorder flex items-center justify-center gap-1.5 transition shadow-2xs">
+                    <i class="fa-solid fa-circle-plus text-iuwe-blue"></i>
+                    <span>Criar</span>
+                </a>
+                <a href="salvos.html" class="py-2 px-2 rounded-xl bg-white hover:bg-iuwe-blue hover:text-white text-iuwe-blue border border-iuwe-purpleBorder flex items-center justify-center gap-1.5 transition shadow-2xs">
+                    <i class="fa-solid fa-bookmark text-iuwe-blue"></i>
+                    <span>Salvos</span>
+                    <span id="badge-count-saved" class="px-1.5 py-0.2 rounded-full bg-iuwe-blue text-white text-[9.5px]">0</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- 1. HERO / CABEÇALHO DA MARCA COM LOGO OFICIAL -->
+        <header class="iuwe-card rounded-3xl p-6 sm:p-8 shadow-lg shadow-purple-200/40 text-center space-y-4 relative overflow-hidden">
+            <div class="w-full h-1.5 bg-gradient-to-r from-purple-400 via-iuwe-blue to-iuwe-teal absolute top-0 left-0"></div>
+
+            <!-- Logo Oficial IUWE (IUWE-logo.jpeg) -->
+            <div class="inline-flex items-center justify-center logo-frame-box bg-white rounded-3xl border-2 border-iuwe-purpleBorder shadow-sm px-6 py-3 mx-auto">
+                <img src="data:image/webp;base64,UklGRiYNAABXRUJQVlA4IBoNAAAwRwCdASp8AYoAPp1IoEolpKOhpdQbwLATiWJu/DnvCWP/73+gdxVrn53+B9IvkXuK9UxTOSfLb6H85H+G/XP3J/or2Euc3/1PQT/Of+F6sX/X9ZnnHelr6vPopdNBkL3lrtGx+9p/1gjt7eLm/9o4kPszrmf23njdUTIJPnbl8hK56q+Qlc9Vd2umR75Nr0uURJsAFisLxXgHlEbGgpVclCZ7bgIci8OVrAx10tjpJR+1UF+3ew9ei+cx8C/oT+CmV+/xA0g0WxecgNV5mJ0u04Z/q0UhC0mZBHQ4tTlo8AM41rMccsHjx/2DiBL5/UjkGBAagL1mbDm3QBRpvaQKTn05lvVO8gRvME8Bn7XjcbnOViVOSwwngZXRMhex8c+FX4yyzN5yao4nvBFimhPRxZWdiOYp1yR7y/TSIsJ4K0jwhrr1NHc9MYJrW4aJkpcMQ+bgbPICGFcecV0BZJpGKHr72sueUGqQrhMGageFquMnP+LPY2wjTylXHE77j9sqsjjLbk4gk+QoDl6k13jQAxj/dIhn1a5uT4XNxOQY95l+Sk2M53iwP43mJc9TI147Juy5scfQxejLg1Nx4Xg+PNlX5eYjF3Q7bxppguqksPwTEJVbX17jCnUCAkZTrsbHI+1dDvcHG+TsSoGMpv5Z3ZMw9xew0erc73ajaCm6QSLNXF/9nntbSjSPTkcaO7qaWCnz0bgN09eeZzPchE8JuG4Kb77oodcfVBt5IJefIYAGFpa5FqUzJ87cvkJXPVXw8AD++bEAAAADJ4pTBXa6YvmQ4XmFKZWeLGKDD1+bf/JG8CrLWHW/XN/25b45NCiPF8yG9bNKrJDnYuSzeY958mNdWkoG5ljBfJ7FfUJLMX3ktA9aXYLUYc42bGlO9eifQ2F7xtRXqxvGwsl9GqbLKpTHLhuPiSAg1u4MmVJjdflplvAXjaheL6SaHWIGEcJVuKdYielF//7xrJ1SctAVbdxb2P8cNkAyE7TQ4AuNFSNVO0PWi5Bbk27jMm5Ac1OxxNs8yTpStg4beBp+VZbuo8kXo7yXZsPuC/xhtzSL8VEgbsc9rgO4EvsllJLi/4NBsxikJeaHzX+9LHgHekFFGiHFYKILZaQy01iQLdGW5/bIFDKoOvIbG2ArQoOKBKwz43BGQJmHjqRZJPatI6eZxrDhZU6rsfI5jLGLPuyE+Qm1Uv1fMBWWH1+XMwaWzx37NGeVZVQ8zMmjXax5BBsIu/WrHfFMpAPVP8tR305b+hQ1cVnwKT2GtwiuYHA8PRF4Hh2RDZ71WyTHH6F/jiEGYC3Y35ijXnfrbhiWRpc+KlLeqUvC7Co4O/X8lBP1iGY6MfXy5bYhESKnK3JuAzumZUt3vJFfjLsiV8+trAMe8jzgmHeIS6BT/fr29yMcZfHTQlc1cj0OLYRZ3+PJ7wPOmk3K38wKFKPjq7HLNlZ8Fy5AKJZSfqrkpCQdgWVF0uJ6TFJIJtcijdPStR4toQ0mv7ZGsRe3E/jdMuIv3DM4naWcdUa6dyPcHSFBpywckbFz130fyN//48pXB5gUmLuDAAOZN4MKs3HXbfKAlnrrzusu+WAN43QZ8L7f4xYhaQ2jQVle8ocwJYzmZipghPWKtwhOCi7PQ6lYjnZ3SVvoq2AiAYaGFSMNpzDM1ehFD2AXSuNtyOUJ2W37k4SiNEHI6yEJyWoGwBxYuKZO0qbjAtpCH1MbxIMqnUaaCvy9W7DhlIc3iS/r2jImixH1rc/bFmiRA61zJftP5W0DW8ZZt90uMGi8h2QadoPrgVfu1zqVtSpoOhETM0mRs/GGAHCFchIJLX7/NL/oyqF3aIRA5s/NilFvL83Egrt7kDmS8EtpFBtOQCmZgy9hvJIRrba11GvFcib4brMgBfHAxORW/2dTHNJOpOfMHyIQnSLXppwi9lwhcGJ0iIt1NFNG+vrt/4JsR3ssF9f1xe2xhZYlIlFzqcCDW7nVy5ZSDArFGf+2jGNHijR82yxauXvEs/3Xcq5WBVapouIJ6ahHJ03zJDvw5+viMce+P94GN+JxqTtOozPZ5VgXvLj/5QGSHu/XvVZMEvxQRjJi40jE2T+ehfKtYHpt6frMXyR/4mL+XQkcotpE1LdgyxW1+r/Sw0DY7z+LJl17ZIGMUceOsHtHbj9JgSNIq5T6WneBJrB4fSt5jsXYrAF2NVRHColzyQMB2LbBKeeAWkd8lgHRGKPHtb8bhNdf3yvyI1JlGGCSNhO7rILFLrRMqDKF2Hb7z50d4jIX6XX0cG56jQ18efbJ1KyEbKl8v1E3mOAtnVvKmf1f3bjNIYEocAaNixxMw3owj4kcsKrzjVlAEn5fCOMVfEsdle6QPurF+oBGdee/heR4aWy1/m1WkqEfP5/UOdTEZquk2JdzSBjGky+BdEuG+71Ne0lR4MGoGE4vHFZKND+HDys3ICjkSeTchxjlsFGGlZE9P524Ex1RlNfko+Jo18HGbIlizTfHmEMZ0CSs3ZwMtqwa2GRM+u6xD+XOj0/u6yJPjKk2kXupeylfW/Gm1t8ytCQXLf7fjktgAA9ZmvlGwrjNmRJwtl5R0poh78zBVmK0dvXZxb3zBEFjbRa6wBKolvN+IFWnuh3NMgbcK6NiZzBO+TRysvyWUi6ihqotZW3mhPp28QgL6ew3G3h+PaTbkV/8yi9d1MKzpWCnTx5/MlsdviyBIXgiP1Mke4YegrBvYi1x9I+CWAmleih6966BZePGIe0OGQuYggqyg35V2esJWAoX8KYAweO16ANxCoDFVNyi/oCl8i2WZo2EeJynHrMSzCnrqtVAA7ll1TmJrOc7FbLKfeRkGCaQN1bQtIWgVmPmJK7U+EbhoRdjMPciTbjxydLGFQpE9zk10bPaZzsfOFM84gSH7J/hk2otndkvPyt5UbasP6t8nHNpfsoEmrXuGbxJgm0jqFAMmDy3a/0vSdjcK9d7fpsrcZuzQbEhuj1pyU+1uZWmyXtuBCw4WN6RwGtqa+B6d5mqqxMO0Jd4oWPFL/M7RcoCNGl1jtVkrArXdxmpqHtypGD95o3rY4z1A6y0wEqtURyvisqSvcsuL5nGOq4HK92I4LqeCDFdmHHAJcsJrHJnql1Efst+XOpqtLxiOdh5Sx2E+II0vY6AJTbE5lpf77xO/7VrMLAMS9+sRlXKxKsm6ce7cw1nYBxNhaePc2yFUTHzTUwNx5wKzrZeI/pqleenYqK20NiLuwL+AmOHgkgH/oLJj/Ne6inXQvy1OENN77+/lG8qliWPgZ5RD1RRjmr/X4Im9gIAGaa9JSLjY3sBimX8UYfUZWmZ535nLl/+6VbmGbJWzKvycLOCuQ5UBvC7kBD/gcHdHVeW8LYkyh/bTUDHYIKH90pQYynh4lcgTA+dOTENbnMxv9sEy1Jnix2faMHgljVTAETi9oY+i7qBtPKJqFr2LeW2DgNs2k+O93QyjAWr1xwfKBWXo6+u+HQ9scWEqsg4LhIUi4IMvZggTQ9Ly8xZ8QQwjetLZX43Nt9etzNlkpIJWh2DGUjTbqxDVbo3p3ep5SQepmAVrd1lGj3ju/cCTnZJGGiy0MLQeudvwv6wpKCmy9dnX86l1HIbWLs0An+AnSokCDx+V4DyRNE618ExkAIg2L3VNuJekqkmLJE98ALNQ/mH95U/2pfzQl48o5WDrM+1PsHsbIsuI9bIRxyB9X4rUBB9z/iVnw+7yADLyjF4mcjIGxkSAArh1VZTko5fRReBeHT42bGI8GRMR53lxH6K8uRDWK+aYNL4/YkLfNM6enbk7gc+zQF8fVYykJ/HNobsKQiuAa+rMT6C5XvjLHDZk9eqcpNiF9LGbmfDZi0rW/dieddsjn1AWfPFgK9uhGfK7+91D/QSii/B2byPPTrZSnpO34wiVohn9LoJ1XylyGe2xZKoZ97vKNxoAvuYxvcfccDRHa+h9jddaECMqaO5gWXtGC/w/NarrEl9RXeoP8fpH/a9eBmZlFTrSJYHO1vtpW2vDx5FjuTFMjcFPgUuklgwziuwFWoqRGRSbcXfndelhSbmSToAEFYNvnO6o1C8bYGMH+h2Z+LXwAGFEdo1bjdZvETsFNEKCgEwjgjP3TCr85xz+b7AfdpU6296gnXsfbNCAsw6moWZZSRFPsDgLou6nyBX3QfnGNyll3iL3qUNRSjefCjVwbLJZxdX38HJWENfiopq+8DmeajXSqSLjomerDeIyLiOqY1qqd57u9IHyOoIyXNtlkG9RxuAiSvwQ1A+snl23a/XQyK1OoZVRK1Xksu7M7DAaHz0OjmrNFCYSUtqvRCVKTcPV/sDGJQIeZGGdxL+rO3Rx/3TV9fbiYOfarAF0dwdC0mDAH9gVivptgBKYEZ8xJTsQbS2AO/DwMoACiqgApr+Ldu90kO8HLEzDnwZOCjZGOiAGW4S33T3GcKMjyxAHU42YZOxODrzQEywA7g65MDnAHZAAAAAAAAAAAA=" data-iuwe-logo="full" alt="IUWE - I learn, yoU learn, We learn" class="h-16 sm:h-20 w-auto object-contain">
+            </div>
+
+            <div class="space-y-1.5">
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-purple-500">
+                    Aprendizado Colaborativo, Gratuito e Sem Fronteiras
+                </h1>
+                <p class="text-xs sm:text-sm font-bold text-iuwe-blue">
+                    Acesso Democrático, Seguro (LGPD) e Offline à Prática de Idiomas
+                </p>
+            </div>
+
+            <!-- Frase Chamativa Principal -->
+            <div class="max-w-xl mx-auto my-2 bg-gradient-to-r from-purple-400 via-iuwe-blue to-iuwe-sky p-0.5 rounded-2xl shadow-md shadow-purple-200/50">
+                <div class="bg-white/95 rounded-[14px] px-4 py-3 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                    <span class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold uppercase tracking-wider text-purple-500">
+                        <i class="fa-solid fa-cloud-arrow-down"></i> Construa Online,
+                    </span>
+                    <span class="hidden sm:inline text-purple-300 font-bold">•</span>
+                    <span class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold uppercase tracking-wider text-iuwe-blue bg-iuwe-ice/30 px-3 py-0.5 rounded-full border border-iuwe-ice">
+                        <i class="fa-solid fa-headphones"></i> Pratique Offline (.HTML 3D &amp; .WAV)
+                    </span>
+                </div>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-900 font-medium leading-relaxed max-w-2xl mx-auto pt-1">
+                Crie, salve e compartilhe materiais de estudo interativos em <b>4 formatos (Audiocast, Flashcard 3D, Livreto Ilustrado e Vocabulário IA)</b>, baixe pacotes autônomos para o seu celular e <strong class="text-black font-bold">pratique idiomas 100% OFFLINE — sem depender de pacote de dados</strong>, onde e quando você quiser.
+            </p>
+
+            <!-- Selos em Fonte Pequena (Light Blue & Light Purple sobre Branco) -->
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
+                <span class="px-3 py-1.5 rounded-xl bg-iuwe-purple border border-iuwe-purpleBorder text-iuwe-blue text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-heart text-purple-500"></i> 100% Gratuito (Tradução GTX + Dual Audio)
+                </span>
+                <span class="px-3 py-1.5 rounded-xl bg-white border border-iuwe-ice text-iuwe-blue text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-plane-up text-purple-500"></i> Pacotes Offline (.HTML 3D / .WAV / .PNG)
+                </span>
+                <span class="px-3 py-1.5 rounded-xl bg-iuwe-purple border border-iuwe-purpleBorder text-iuwe-blue text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved text-purple-500"></i> Privacidade LGPD &amp; Cofre RAM AES-256
+                </span>
+            </div>
+        </header>
+
+        <!-- 2. NOSSA ORIGEM E INSPIRAÇÃO -->
+        <section class="iuwe-card rounded-3xl p-5 sm:p-7 shadow-md shadow-purple-200/30 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-iuwe-purple border border-iuwe-purpleBorder flex items-center justify-center text-purple-500 flex-shrink-0 shadow-sm">
+                    <i class="fa-solid fa-earth-americas text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-iuwe-blue">Nossa Origem e Propósito</span>
+                    <h2 class="text-base sm:text-xl font-extrabold text-purple-500 leading-tight">De 20 Anos Aprendendo Sozinho para o Mundo</h2>
+                </div>
+            </div>
+
+            <div class="bg-iuwe-purple/70 border border-iuwe-purpleBorder rounded-2xl p-4 sm:p-5 space-y-3 text-xs sm:text-sm text-slate-900 leading-relaxed font-medium">
+                <p>
+                    O <b>IUWE</b> nasceu de uma vivência real: <strong class="text-black font-bold">eu construí a oportunidade de morar em outro país por ter aprendido inglês sozinho ao longo de 20 anos.</strong> Essa jornada autodidata mostrou na prática que a constância, a repetição ativa e a exposição diária ao idioma têm o poder de transformar destinos.
+                </p>
+                <p>
+                    Mas aprender um novo idioma vai muito além de cruzar fronteiras geográficas. <strong class="text-black font-bold">O aprendizado de idiomas amplia largamente a quantidade de conteúdo geral, cultural e científico ao qual você tem acesso.</strong> É uma chave que destrava livros, pesquisas, cursos, arte e conexões humanas que antes estavam inacessíveis.
+                </p>
+            </div>
+
+            <!-- 3 Pilares -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-3.5 flex items-start gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-iuwe-purple text-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-flask text-xs"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-xs font-extrabold text-purple-500">Acesso Científico</h3>
+                        <p class="text-[11px] text-slate-900 font-medium mt-0.5 leading-snug">Artigos, normas técnicas, estudos globais e documentação sem barreiras.</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-3.5 flex items-start gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-iuwe-purple text-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-masks-theater text-xs"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-xs font-extrabold text-purple-500">Horizonte Cultural</h3>
+                        <p class="text-[11px] text-slate-900 font-medium mt-0.5 leading-snug">Obras originais, cinema, música, história e novas visões de mundo.</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-3.5 flex items-start gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-iuwe-purple text-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-door-open text-xs"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-xs font-extrabold text-purple-500">Novas Oportunidades</h3>
+                        <p class="text-[11px] text-slate-900 font-medium mt-0.5 leading-snug">Autonomia para viajar, trabalhar ou viver uma experiência internacional.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. OS 4 FORMATOS DE ESTÚDIO E AS 6 GUIAS -->
+        <section class="iuwe-card rounded-3xl p-5 sm:p-7 shadow-md shadow-purple-200/30 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-iuwe-purple border border-iuwe-purpleBorder flex items-center justify-center text-purple-500 flex-shrink-0 shadow-sm">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-iuwe-blue">Recursos Disponíveis na Plataforma v2.0</span>
+                    <h2 class="text-base sm:text-xl font-extrabold text-purple-500 leading-tight">4 Ferramentas de Criação + Porteiro Anti-Ofensa &amp; Auto-Tags + E-mail Criptografado</h2>
+                </div>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-900 font-medium leading-relaxed">
+                A plataforma conta com tradução cultural automática gratuita, alternância instantânea entre o <strong class="text-black font-bold">Modo Free de Áudio (sem chave)</strong> e o <strong class="text-black font-bold">Modo Gemini 24kHz Neural</strong>, <strong class="text-black font-bold">Porteiro automatizado (moderação anti-ofensa/preconceito e classificação automática de #tags)</strong> e <strong class="text-black font-bold">retenção criptografada de e-mail (RSA-OAEP 2048-bit)</strong> ao sincronizar sua biblioteca com o Google:
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-4 space-y-1.5">
+                    <div class="font-extrabold text-purple-500 flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-headphones text-iuwe-blue"></i> <span>Audiocast (Ciclo de Fala + Pausa)</span>
+                    </div>
+                    <p class="text-[11px] text-slate-900 leading-relaxed">Monte sequências de frases com intervalos programados de silêncio para repetição em voz alta (<i>shadowing</i>) e baixe o arquivo <code>.wav</code> 24kHz.</p>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-4 space-y-1.5">
+                    <div class="font-extrabold text-purple-500 flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-clone text-iuwe-blue"></i> <span>Flashcard 3D Multi-Idiomas</span>
+                    </div>
+                    <p class="text-[11px] text-slate-900 leading-relaxed">Cartões interativos com giro 3D (Lado A no idioma nativo ⇄ Lado B em múltiplos idiomas de estudo), pronúncia integrada e exportação em <code>.html</code> autônomo.</p>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-4 space-y-1.5">
+                    <div class="font-extrabold text-purple-500 flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-book-open text-iuwe-blue"></i> <span>Livreto Ilustrado (Slide Book)</span>
+                    </div>
+                    <p class="text-[11px] text-slate-900 leading-relaxed">Histórias e diálogos visuais página por página com upload de ilustração, até 3 idiomas simultâneos por slide e pacote offline completo.</p>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-4 space-y-1.5">
+                    <div class="font-extrabold text-purple-500 flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-spell-check text-iuwe-blue"></i> <span>Vocabulário IA &amp; Prática de Ditado</span>
+                    </div>
+                    <p class="text-[11px] text-slate-900 leading-relaxed">Listas temáticas de termos e frases aplicadas com motor de ditado interativo que avalia sua escrita em tempo real.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. PRÁTICA OFFLINE EM QUALQUER LUGAR -->
+        <section class="iuwe-card rounded-3xl p-5 sm:p-7 shadow-md shadow-purple-200/30 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-iuwe-purple border border-iuwe-purpleBorder flex items-center justify-center text-purple-500 flex-shrink-0 shadow-sm">
+                    <i class="fa-solid fa-headphones-simple text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-iuwe-blue">Nosso Objetivo e Visão</span>
+                    <h2 class="text-base sm:text-xl font-extrabold text-purple-500 leading-tight">Construa Online, Pratique Offline — No Seu Ritmo</h2>
+                </div>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-900 font-medium leading-relaxed">
+                Sabemos que nem todo mundo dispõe de internet móvel ilimitada ou tempo livre em frente ao computador. Por isso, você monta suas trilhas uma única vez no Wi-Fi e <strong class="text-black font-bold">pratica desconectado, sem gastar dados móveis</strong>:
+            </p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-3.5 text-center space-y-1">
+                    <div class="w-9 h-9 rounded-full bg-iuwe-purple text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center mx-auto shadow-sm">
+                        <i class="fa-solid fa-train-subway text-sm"></i>
+                    </div>
+                    <h3 class="text-xs font-extrabold text-purple-500">No Metrô ou Trem</h3>
+                    <p class="text-[11px] text-slate-900 font-medium leading-tight">Mesmo em túneis sem sinal de internet.</p>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-3.5 text-center space-y-1">
+                    <div class="w-9 h-9 rounded-full bg-iuwe-purple text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center mx-auto shadow-sm">
+                        <i class="fa-solid fa-person-running text-sm"></i>
+                    </div>
+                    <h3 class="text-xs font-extrabold text-purple-500">Correndo na Rua</h3>
+                    <p class="text-[11px] text-slate-900 font-medium leading-tight">Treine a escuta ativa durante sua caminhada.</p>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-3.5 text-center space-y-1">
+                    <div class="w-9 h-9 rounded-full bg-iuwe-purple text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center mx-auto shadow-sm">
+                        <i class="fa-solid fa-dumbbell text-sm"></i>
+                    </div>
+                    <h3 class="text-xs font-extrabold text-purple-500">Treinando</h3>
+                    <p class="text-[11px] text-slate-900 font-medium leading-tight">Transforme a academia em imersão no idioma.</p>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-3.5 text-center space-y-1">
+                    <div class="w-9 h-9 rounded-full bg-iuwe-purple text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center mx-auto shadow-sm">
+                        <i class="fa-solid fa-bus text-sm"></i>
+                    </div>
+                    <h3 class="text-xs font-extrabold text-purple-500">No Ônibus</h3>
+                    <p class="text-[11px] text-slate-900 font-medium leading-tight">Aproveite o trajeto diário para o trabalho.</p>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-3.5 text-center space-y-1">
+                    <div class="w-9 h-9 rounded-full bg-iuwe-purple text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center mx-auto shadow-sm">
+                        <i class="fa-solid fa-sliders text-sm"></i>
+                    </div>
+                    <h3 class="text-xs font-extrabold text-purple-500">Do Seu Jeito</h3>
+                    <p class="text-[11px] text-slate-900 font-medium leading-tight">Escolha frases, voz, velocidade e pausas.</p>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-3.5 text-center space-y-1">
+                    <div class="w-9 h-9 rounded-full bg-iuwe-purple text-purple-500 border border-iuwe-purpleBorder flex items-center justify-center mx-auto shadow-sm">
+                        <i class="fa-solid fa-wifi text-sm line-through text-rose-400"></i>
+                    </div>
+                    <h3 class="text-xs font-extrabold text-purple-500">Zero Dados</h3>
+                    <p class="text-[11px] text-slate-900 font-medium leading-tight">Gere no Wi-Fi e ouça offline quantas vezes quiser.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. TRANSPARÊNCIA E PAPEL EDUCACIONAL -->
+        <section class="iuwe-card rounded-3xl p-5 sm:p-7 shadow-md shadow-purple-200/30 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-iuwe-purple border border-iuwe-purpleBorder flex items-center justify-center text-purple-500 flex-shrink-0 shadow-sm">
+                    <i class="fa-solid fa-handshake-angle text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-iuwe-blue">Transparência e Papel Educacional</span>
+                    <h2 class="text-base sm:text-xl font-extrabold text-purple-500 leading-tight">Ferramenta Complementar — Para Alunos, Educadores e Voluntários</h2>
+                </div>
+            </div>
+
+            <div class="bg-iuwe-purple/60 border border-iuwe-purpleBorder rounded-2xl p-4 space-y-2 text-xs sm:text-sm text-slate-900 leading-relaxed font-medium">
+                <p>
+                    <strong class="text-black font-bold">Não somos uma escola de idiomas e não atuamos como professores.</strong> O uso do estúdio IUWE não substitui, mas sim complementa e potencializa o uso de outras ferramentas de ensino, aulas particulares, livros ou cursos regulares.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-4 space-y-1.5">
+                    <div class="flex items-center gap-2 text-purple-500 font-extrabold text-xs sm:text-sm">
+                        <i class="fa-solid fa-user-graduate text-iuwe-blue"></i>
+                        <span>Para Estudantes e Autodidatas</span>
+                    </div>
+                    <p class="text-xs text-slate-900 leading-relaxed font-medium">
+                        Transforme o vocabulário que você viu na sua aula, curso ou livro em áudios de repetição espaçada, flashcards 3D e livretos ilustrados para treinar todos os dias.
+                    </p>
+                </div>
+                <div class="bg-white border border-iuwe-purpleBorder rounded-2xl p-4 space-y-1.5">
+                    <div class="flex items-center gap-2 text-purple-500 font-extrabold text-xs sm:text-sm">
+                        <i class="fa-solid fa-chalkboard-user text-iuwe-blue"></i>
+                        <span>Para Professores e Voluntários</span>
+                    </div>
+                    <p class="text-xs text-slate-900 leading-relaxed font-medium">
+                        Educadores da rede pública ou privada e colaboradores voluntários podem gerar materiais estruturados nos 4 formatos para suas turmas e para toda a comunidade IUWE.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. RODAPÉ -->
+        <footer class="iuwe-card rounded-3xl p-5 sm:p-6 text-center space-y-3 shadow-sm">
+            <div class="flex items-center justify-center gap-2 flex-wrap">
+                <a href="guia.html" class="px-4 py-2 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition">
+                    <i class="fa-solid fa-shield-halved"></i> Guia de Uso &amp; Gmail Dedicado
+                </a>
+                <a href="index.html" class="px-4 py-2 rounded-xl bg-iuwe-blue hover:bg-iuwe-sky text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition">
+                    <i class="fa-solid fa-rocket"></i> Abrir Feed Público &amp; Estúdio
+                </a>
+            </div>
+            <div class="pt-2 border-t border-iuwe-purpleBorder/60 flex items-center justify-center gap-2 text-xs font-extrabold text-purple-500 tracking-wide">
+                <span>IUWE v2.0</span>
+                <span class="text-purple-300">•</span>
+                <span class="italic font-semibold text-iuwe-blue">I learn, yoU learn, We learn</span>
+            </div>
+        </footer>
+
+    </div>
+
+
+    <script src="iuwe-core.js"></script>
+
+</body>
+</html>
