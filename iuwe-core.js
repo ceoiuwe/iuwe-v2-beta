@@ -1074,11 +1074,12 @@ window.IUWE_ASSETS_B64 = {
         // 3. MOTOR COMPARTILHADO DE IA, TRADUÇÃO E ÁUDIO NEURAL 24KHZ SEM RUÍDO
         // ============================================================================
         const TEXT_MODELS = [
+            'gemini-3.5-flash-lite',
+            'gemini-3.1-flash-lite',
+            'gemini-3.8-flash',
             'gemini-3-flash-preview',
             'gemini-2.5-flash-lite',
-            'gemini-2.5-flash',
-            'gemini-2.0-flash-lite',
-            'gemini-2.0-flash'
+            'gemini-2.5-flash'
         ];
         let textCursor = 0;
 
@@ -1299,99 +1300,185 @@ window.IUWE_ASSETS_B64 = {
             return new Blob([buffer], { type: 'audio/wav' });
         }
 
+        // Modelos TTS com cota gratuita (Free Tier) no Google AI Studio em ordem de prioridade e throughput:
         const TTS_MODELS = [
-            'gemini-2.5-flash-preview-tts',
-            'gemini-2.5-pro-preview-tts'
+            'gemini-3.8-flash-lite-tts',
+            'gemini-3.8-flash-tts',
+            'gemini-3.1-flash-tts-preview',
+            'gemini-2.5-flash-preview-tts'
         ];
         let ttsCursor = 0;
 
+        // Controle por modelo e Fila de Prioridade com bloqueio temporário de 60s pós-limite (Anti-429 cascata):
+        const IUWE_RATE_LIMIT_LOCK_SECONDS = 60;
+        const IUWE_MIN_CALL_INTERVAL_MS = 4000;
+        const IUWE_SAME_MODEL_MIN_INTERVAL_MS = 19500; // ~3 RPM por modelo individual no Free Tier
+        const ttsModelCooldownUntilMs = {};
+        const ttsModelLastCallAtMs = {};
+        const ttsModelDisabledInSession = {};
+        const textModelCooldownUntilMs = {};
+        let lastGlobalAiCallFinishedAtMs = 0;
+        let iuweBatchGenerationActive = false;
+
+        // Fila de Prioridade de Recursos da API Gemini:
+        // Prioridade 1 (Alta): Geração de Frases do Vocabulário IA & Geração de Áudio Individual
+        // Prioridade 2 (Normal/Lote): Geração de Áudios em Lote ("Gerar Todos")
+        const iuweAiPriorityQueue = [];
+        let iuweAiQueueWorkerRunning = false;
+        let iuweAiQueueSeq = 0;
+
+        function enqueueGeminiPriorityCall(taskFn, priority = 1, label = 'API') {
+            return new Promise((resolve, reject) => {
+                iuweAiPriorityQueue.push({
+                    seq: ++iuweAiQueueSeq,
+                    priority: Number(priority) || 1,
+                    label,
+                    taskFn,
+                    resolve,
+                    reject
+                });
+                iuweAiPriorityQueue.sort((a, b) => (a.priority - b.priority) || (a.seq - b.seq));
+                processGeminiPriorityQueue();
+            });
+        }
+
+        async function processGeminiPriorityQueue() {
+            if (iuweAiQueueWorkerRunning) return;
+            iuweAiQueueWorkerRunning = true;
+            try {
+                while (iuweAiPriorityQueue.length > 0) {
+                    const remLockSec = typeof getRemainingCooldownSeconds === 'function' ? getRemainingCooldownSeconds() : 0;
+                    if (remLockSec > 0) {
+                        const err = new Error(`⏳ Bloqueio temporário anti-limite ativo: aguarde ${remLockSec}s antes de enviar nova tentativa à Google.`);
+                        while (iuweAiPriorityQueue.length > 0) {
+                            const item = iuweAiPriorityQueue.shift();
+                            item.reject(err);
+                        }
+                        break;
+                    }
+                    const elapsedSinceLast = Date.now() - lastGlobalAiCallFinishedAtMs;
+                    if (lastGlobalAiCallFinishedAtMs > 0 && elapsedSinceLast < IUWE_MIN_CALL_INTERVAL_MS) {
+                        await new Promise(r => setTimeout(r, IUWE_MIN_CALL_INTERVAL_MS - elapsedSinceLast));
+                    }
+                    const nextItem = iuweAiPriorityQueue.shift();
+                    if (!nextItem) break;
+                    try {
+                        const result = await nextItem.taskFn();
+                        lastGlobalAiCallFinishedAtMs = Date.now();
+                        nextItem.resolve(result);
+                    } catch (err) {
+                        lastGlobalAiCallFinishedAtMs = Date.now();
+                        nextItem.reject(err);
+                    }
+                }
+            } finally {
+                iuweAiQueueWorkerRunning = false;
+            }
+        }
+
+        // Tradução 100% Gratuita (Zero consumo de chamadas da Chave API Gemini!):
+        // Preserva toda a cota da chave API exclusivamente para o Gerador de Frases do Vocabulário IA e para os Áudios TTS.
         async function translateTextWithGemini(rawText, langCode, targetLangName, apiKey) {
             const cleanInput = (rawText || '').trim();
             if (!cleanInput) return '';
-            const activeKey = apiKey || (await secureKeyVault.getApiKey());
-            const regionalNote = REGIONAL_STYLE_NOTES[langCode] || '';
-            const prompt = [
-                `Translate the following input text into ${targetLangName} (language code: ${langCode}).`,
-                regionalNote,
-                `CRITICAL RULES: Preserve the complete meaning accurately, even if the translation uses more words than the original. NEVER use internet abbreviations, shorthand, or contractions like "svp" instead of "s'il vous plaît", "stp", "vc", "pq", "tbh", etc. Write all words out in full standard spelling, and only use slang if the original sentence explicitly contains slang.`,
-                `IMPORTANT: Even if the input text is short or in Portuguese/English/Spanish, you MUST output the final sentence in ${targetLangName}.`,
-                `Return ONLY the translated text itself, without any introductory words, language labels, explanations, or quotes:`,
-                ``,
-                cleanInput
-            ].join('\n');
 
-            if (activeKey) {
-                for (let attempt = 0; attempt < TEXT_MODELS.length; attempt++) {
-                    const idx = (textCursor + attempt) % TEXT_MODELS.length;
-                    const model = TEXT_MODELS[idx];
-                    try {
-                        const res = await window.fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': activeKey },
-                            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                        });
-                        if (res.ok) {
-                            textCursor = (idx + 1) % TEXT_MODELS.length;
-                            const data = await res.json();
-                            const out = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-                            if (out) {
-                                const cleaned = out.replace(/^["'“”«»]+|["'“”«»]+$/g, '').trim();
-                                if (cleaned) return cleaned;
-                            }
+            const tlMap = {
+                'en-US': 'en', 'en-CA': 'en', 'en-GB': 'en',
+                'es-419': 'es', 'es-MX': 'es', 'es-ES': 'es',
+                'fr-CA': 'fr', 'fr-FR': 'fr',
+                'pt-BR': 'pt', 'pt-PT': 'pt',
+                'de-DE': 'de', 'it-IT': 'it', 'ja-JP': 'ja'
+            };
+            const tl = tlMap[langCode] || String(langCode || 'en').split('-')[0];
+
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const gtxRes = await window.fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(tl)}&dt=t&q=${encodeURIComponent(cleanInput)}`, { method: 'GET' });
+                    if (gtxRes.ok) {
+                        const gtxData = await gtxRes.json();
+                        if (Array.isArray(gtxData) && Array.isArray(gtxData[0])) {
+                            let t = gtxData[0].map(seg => (Array.isArray(seg) ? seg[0] : '')).join('').trim();
+                            t = t.replace(/\bsvp\b/gi, "s'il vous plaît").replace(/\bstp\b/gi, "s'il te plaît");
+                            if (t) return t;
                         }
-                    } catch (e) {}
+                    }
+                } catch (e) {}
+                if (attempt < 2) {
+                    await new Promise(r => setTimeout(r, 450 * (attempt + 1)));
                 }
             }
 
-            try {
-                const tlMap = {
-                    'en-US': 'en', 'en-CA': 'en', 'en-GB': 'en',
-                    'es-419': 'es', 'es-MX': 'es', 'es-ES': 'es',
-                    'fr-CA': 'fr', 'fr-FR': 'fr',
-                    'pt-BR': 'pt', 'pt-PT': 'pt',
-                    'de-DE': 'de', 'it-IT': 'it', 'ja-JP': 'ja'
-                };
-                const tl = tlMap[langCode] || langCode.split('-')[0];
-                const gtxRes = await window.fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(tl)}&dt=t&q=${encodeURIComponent(cleanInput)}`, { method: 'GET' });
-                if (gtxRes.ok) {
-                    const gtxData = await gtxRes.json();
-                    if (Array.isArray(gtxData) && Array.isArray(gtxData[0])) {
-                        let t = gtxData[0].map(seg => (Array.isArray(seg) ? seg[0] : '')).join('').trim();
-                        t = t.replace(/\bsvp\b/gi, "s'il vous plaît").replace(/\bstp\b/gi, "s'il te plaît");
-                        if (t) return t;
-                    }
-                }
-            } catch (e) {}
-
-            throw new Error('Não foi possível traduzir para ' + targetLangName + '. Verifique sua conexão ou Chave de API.');
+            throw new Error('Não foi possível traduzir automaticamente para ' + (targetLangName || langCode) + '. Verifique sua conexão.');
         }
 
-        async function synthesizeCleanPcmWithGemini(spokenText, voiceName, apiKey) {
+        async function synthesizeCleanPcmWithGemini(spokenText, voiceName, apiKey, priorityLevel = null) {
+            const remLock = typeof getRemainingCooldownSeconds === 'function' ? getRemainingCooldownSeconds() : 0;
+            if (remLock > 0) {
+                throw new Error(`⏳ Proteção de 60s da API ativa: aguarde ${remLock}s antes de enviar qualquer nova tentativa.`);
+            }
+
             const activeKey = apiKey || (await secureKeyVault.getApiKey());
             if (!activeKey) {
                 if (typeof window.toggleApiKeyModal === 'function') window.toggleApiKeyModal();
                 throw new Error('Ative sua Chave de API Gemini gratuita no botão "Chave API" do topo para sintetizar o áudio neural 24kHz sem ruído!');
             }
-            const payload = {
-                contents: [{ parts: [{ text: spokenText }] }],
-                generationConfig: {
-                    responseModalities: ['AUDIO'],
-                    speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName || 'Zephyr' } } }
-                }
-            };
-            const retryDelays = [1600, 3200, 5500, 8000];
-            for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
+
+            const effectivePriority = priorityLevel !== null ? priorityLevel : (iuweBatchGenerationActive ? 2 : 1);
+
+            return enqueueGeminiPriorityCall(async () => {
+                const payload = {
+                    contents: [{ parts: [{ text: spokenText }] }],
+                    generationConfig: {
+                        responseModalities: ['AUDIO'],
+                        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName || 'Zephyr' } } }
+                    }
+                };
+
+                let sawRateLimit429 = false;
+                const startCursor = ttsCursor;
+
                 for (let m = 0; m < TTS_MODELS.length; m++) {
-                    const idx = (ttsCursor + m) % TTS_MODELS.length;
+                    const idx = (startCursor + m) % TTS_MODELS.length;
                     const model = TTS_MODELS[idx];
+
+                    if (ttsModelDisabledInSession[model]) continue;
+                    const now = Date.now();
+                    if (ttsModelCooldownUntilMs[model] && now < ttsModelCooldownUntilMs[model]) {
+                        sawRateLimit429 = true;
+                        continue;
+                    }
+
+                    // Se este modelo específico foi chamado há menos de ~19,5s, verifica se há outro modelo livre na rotação;
+                    // caso todos tenham sido usados recentemente, aguarda o tempo restante para respeitar os 3 RPM por modelo.
+                    const lastUsed = ttsModelLastCallAtMs[model] || 0;
+                    if (lastUsed > 0 && (now - lastUsed) < IUWE_SAME_MODEL_MIN_INTERVAL_MS) {
+                        const hasAnotherReadyModel = TTS_MODELS.some((altModel, altIdx) => {
+                            if (altIdx === idx || ttsModelDisabledInSession[altModel]) return false;
+                            if (ttsModelCooldownUntilMs[altModel] && now < ttsModelCooldownUntilMs[altModel]) return false;
+                            const altLast = ttsModelLastCallAtMs[altModel] || 0;
+                            return (now - altLast) >= IUWE_SAME_MODEL_MIN_INTERVAL_MS;
+                        });
+                        if (hasAnotherReadyModel) {
+                            continue;
+                        }
+                        const waitNeeded = IUWE_SAME_MODEL_MIN_INTERVAL_MS - (now - lastUsed);
+                        if (waitNeeded > 0 && waitNeeded <= 15000) {
+                            await new Promise(r => setTimeout(r, waitNeeded));
+                        }
+                    }
+
+                    // Avança sempre o cursor para distribuir as chamadas entre os modelos gratuitos
+                    ttsCursor = (idx + 1) % TTS_MODELS.length;
+                    ttsModelLastCallAtMs[model] = Date.now();
+
                     try {
                         const res = await window.fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'x-goog-api-key': activeKey },
                             body: JSON.stringify(payload)
                         });
+
                         if (res.ok) {
-                            ttsCursor = (idx + 1) % TTS_MODELS.length;
                             const data = await res.json();
                             const part = data?.candidates?.[0]?.content?.parts?.[0];
                             const b64 = part?.inlineData?.data;
@@ -1402,16 +1489,32 @@ window.IUWE_ASSETS_B64 = {
                                 return extractCleanPcm16(base64ToArrayBuffer(b64), defaultRate);
                             }
                         }
-                        if ((res.status === 429 || res.status >= 500) && attempt < retryDelays.length) {
-                            break;
+
+                        if (res.status === 404) {
+                            // Modelo desligado ou indisponível para o projeto: desativa na sessão e tenta o próximo imediatamente
+                            ttsModelDisabledInSession[model] = true;
+                            continue;
                         }
-                    } catch (e) {}
+
+                        if (res.status === 429) {
+                            sawRateLimit429 = true;
+                            ttsModelCooldownUntilMs[model] = Date.now() + (IUWE_RATE_LIMIT_LOCK_SECONDS * 1000);
+                            // Não dá break! Tenta imediatamente o próximo modelo gratuito da rotação
+                            continue;
+                        }
+                    } catch (e) {
+                        continue;
+                    }
                 }
-                if (attempt < retryDelays.length) {
-                    await new Promise(r => setTimeout(r, retryDelays[attempt]));
+
+                // Se chegou aqui e houve 429 em todos os modelos disponíveis, aplica bloqueio temporário global de 60 segundos
+                if (sawRateLimit429 && typeof startCooldownTicker === 'function') {
+                    startCooldownTicker(IUWE_RATE_LIMIT_LOCK_SECONDS, 'Limite de chamadas da Google atingido — bloqueio temporário de 60s ativado para proteger sua chave.');
+                    throw new Error('⏳ Limite por minuto/dia da API Gemini atingido nos modelos de voz. Bloqueio preventivo de 60 segundos ativado antes de nova tentativa.');
                 }
-            }
-            throw new Error('Limite temporário de voz da API Gemini atingido. Aguarde alguns segundos e clique novamente.');
+
+                throw new Error('Não foi possível sintetizar o áudio agora. Verifique sua Chave de API ou aguarde a liberação da fila.');
+            }, effectivePriority, 'TTS_AUDIO');
         }
 
         function createContextualSceneDataUrl(promptText, slideIndex = 0) {
@@ -2637,16 +2740,21 @@ window.IUWE_ASSETS_B64 = {
             if (icon) icon.className = 'fa-solid fa-spinner animate-spin';
             if (label) label.textContent = 'Traduzindo e Gerando Vozes...';
 
+            iuweBatchGenerationActive = true;
             try {
                 await window.translateAllBackItemsFromFront();
                 await window.generateFrontSideAudio();
                 for (const item of backLanguageItems) {
+                    if (typeof getRemainingCooldownSeconds === 'function' && getRemainingCooldownSeconds() > 0) break;
                     await window.generateSingleBackItemAudio(item.id);
                 }
-                showToast('Flashcard completo (Lado A + Lado B) traduzido e sonorizado!', 'success');
+                if (!(typeof getRemainingCooldownSeconds === 'function' && getRemainingCooldownSeconds() > 0)) {
+                    showToast('Flashcard completo (Lado A + Lado B) traduzido e sonorizado!', 'success');
+                }
             } catch (err) {
                 showToast(err.message, 'error');
             } finally {
+                iuweBatchGenerationActive = false;
                 if (btn) btn.disabled = false;
                 if (icon) icon.className = 'fa-solid fa-wand-magic-sparkles';
                 if (label) label.textContent = 'Traduzir & Gerar Áudios (Lado A + B)';
@@ -3361,29 +3469,36 @@ window.IUWE_ASSETS_B64 = {
             if (label) label.textContent = 'Sonorizando Todos os Slides...';
 
             const savedIdx = activeSlideIndex;
+            iuweBatchGenerationActive = true;
             try {
                 for (let i = 0; i < bookletSlides.length; i++) {
+                    if (typeof getRemainingCooldownSeconds === 'function' && getRemainingCooldownSeconds() > 0) break;
                     activeSlideIndex = i;
                     renderSlideTabsAndEditor();
                     if (!bookletSlides[i].primaryHasAudio || !bookletSlides[i].primaryWavDataUrl) {
+                        if (label) label.textContent = `Fila de Áudio: Slide ${i + 1}/${bookletSlides.length} (1º Idioma)...`;
                         await window.generateCurrentSlideLangAudio('primary');
-                        await waitMs(350);
                     }
+                    if (typeof getRemainingCooldownSeconds === 'function' && getRemainingCooldownSeconds() > 0) break;
                     if (bookletSlides[i].enableSecondary !== false && (!bookletSlides[i].secondaryHasAudio || !bookletSlides[i].secondaryWavDataUrl)) {
+                        if (label) label.textContent = `Fila de Áudio: Slide ${i + 1}/${bookletSlides.length} (2º Idioma)...`;
                         await window.generateCurrentSlideLangAudio('secondary');
-                        await waitMs(350);
                     }
+                    if (typeof getRemainingCooldownSeconds === 'function' && getRemainingCooldownSeconds() > 0) break;
                     if (bookletSlides[i].enableTertiary && (!bookletSlides[i].tertiaryHasAudio || !bookletSlides[i].tertiaryWavDataUrl)) {
+                        if (label) label.textContent = `Fila de Áudio: Slide ${i + 1}/${bookletSlides.length} (3º Idioma)...`;
                         await window.generateCurrentSlideLangAudio('tertiary');
-                        await waitMs(350);
                     }
                 }
                 activeSlideIndex = savedIdx;
                 renderSlideTabsAndEditor();
-                showToast(`Todos os ${bookletSlides.length} slides prontos!`, 'success');
+                if (!(typeof getRemainingCooldownSeconds === 'function' && getRemainingCooldownSeconds() > 0)) {
+                    showToast(`Todos os ${bookletSlides.length} slides prontos!`, 'success');
+                }
             } catch (err) {
                 showToast(err.message, 'error');
             } finally {
+                iuweBatchGenerationActive = false;
                 if (btn) btn.disabled = false;
                 if (icon) icon.className = 'fa-solid fa-wand-magic-sparkles';
                 if (label) label.textContent = 'Traduzir & Gerar Vozes de Todos os Slides';
@@ -3639,30 +3754,46 @@ window.IUWE_ASSETS_B64 = {
                         `[{"usageNote":"...","primaryTerm":"...","primarySentence":"...","secondaryTerm":"...","secondarySentence":"...","tertiaryTerm":"...","tertiarySentence":"..."}]`
                     ].join('\n');
 
-                    for (let attempt = 0; attempt < TEXT_MODELS.length; attempt++) {
-                        const idx = (textCursor + attempt) % TEXT_MODELS.length;
-                        const model = TEXT_MODELS[idx];
-                        try {
-                            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-                                body: JSON.stringify({
-                                    contents: [{ parts: [{ text: prompt }] }],
-                                    generationConfig: { responseMimeType: 'application/json' }
-                                })
-                            });
-                            if (res.ok) {
-                                textCursor = (idx + 1) % TEXT_MODELS.length;
-                                const data = await res.json();
-                                const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                                const arr = JSON.parse(rawText);
-                                if (Array.isArray(arr) && arr.length > 0) {
-                                    parsedList = arr;
-                                    break;
-                                }
+                    parsedList = await enqueueGeminiPriorityCall(async () => {
+                        let allRateLimited = false;
+                        const startIdx = textCursor;
+                        for (let attempt = 0; attempt < TEXT_MODELS.length; attempt++) {
+                            const idx = (startIdx + attempt) % TEXT_MODELS.length;
+                            const model = TEXT_MODELS[idx];
+                            if (textModelCooldownUntilMs[model] && Date.now() < textModelCooldownUntilMs[model]) {
+                                allRateLimited = true;
+                                continue;
                             }
-                        } catch (e) {}
-                    }
+                            textCursor = (idx + 1) % TEXT_MODELS.length;
+                            try {
+                                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+                                    body: JSON.stringify({
+                                        contents: [{ parts: [{ text: prompt }] }],
+                                        generationConfig: { responseMimeType: 'application/json' }
+                                    })
+                                });
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                                    const arr = JSON.parse(rawText);
+                                    if (Array.isArray(arr) && arr.length > 0) {
+                                        return arr;
+                                    }
+                                }
+                                if (res.status === 429) {
+                                    allRateLimited = true;
+                                    textModelCooldownUntilMs[model] = Date.now() + (IUWE_RATE_LIMIT_LOCK_SECONDS * 1000);
+                                    continue;
+                                }
+                            } catch (e) {}
+                        }
+                        if (allRateLimited && typeof startCooldownTicker === 'function') {
+                            startCooldownTicker(IUWE_RATE_LIMIT_LOCK_SECONDS, 'Limite temporário de geração de texto IA atingido — aguardando 60s.');
+                        }
+                        return null;
+                    }, 1, 'VOCAB_AI_GEN');
                 }
 
                 // Se estiver em Modo Free (sem chave API) ou se a cota da chave tiver acabado, gera gratuitamente!
@@ -3723,8 +3854,9 @@ window.IUWE_ASSETS_B64 = {
         };
 
         window.addNewBlankVocabItem = function() {
-            if (vocabItems.length >= 5) {
-                showToast('Máximo de 5 termos por pacote atingido para manter o arquivo leve!', 'error');
+            const maxItems = (typeof IUWE_RESOURCE_LIMITS !== 'undefined' && IUWE_RESOURCE_LIMITS.vocabMaxItems) ? IUWE_RESOURCE_LIMITS.vocabMaxItems : 6;
+            if (vocabItems.length >= maxItems) {
+                showToast('Máximo de ' + maxItems + ' termos por pacote atingido para manter o arquivo leve!', 'error');
                 return;
             }
             const cur = getCurrentVocabItem();
@@ -3761,8 +3893,9 @@ window.IUWE_ASSETS_B64 = {
         };
 
         window.duplicateCurrentVocabItem = function() {
-            if (vocabItems.length >= 5) {
-                showToast('Máximo de 5 termos por pacote atingido para manter o arquivo leve!', 'error');
+            const maxItems = (typeof IUWE_RESOURCE_LIMITS !== 'undefined' && IUWE_RESOURCE_LIMITS.vocabMaxItems) ? IUWE_RESOURCE_LIMITS.vocabMaxItems : 6;
+            if (vocabItems.length >= maxItems) {
+                showToast('Máximo de ' + maxItems + ' termos por pacote atingido para manter o arquivo leve!', 'error');
                 return;
             }
             const cur = getCurrentVocabItem();
@@ -4322,29 +4455,36 @@ window.IUWE_ASSETS_B64 = {
             if (label) label.textContent = 'Sonorizando Todos os Termos...';
 
             const savedIdx = activeVocabIndex;
+            iuweBatchGenerationActive = true;
             try {
                 for (let i = 0; i < vocabItems.length; i++) {
+                    if (typeof getRemainingCooldownSeconds === 'function' && getRemainingCooldownSeconds() > 0) break;
                     activeVocabIndex = i;
                     renderVocabTabsAndEditor();
                     if (!vocabItems[i].primaryHasAudio || !vocabItems[i].primaryWavDataUrl) {
+                        if (label) label.textContent = `Fila de Áudio: Termo ${i + 1}/${vocabItems.length} (1º Idioma)...`;
                         await window.generateCurrentVocabLangAudio('primary');
-                        await waitMs(350);
                     }
+                    if (typeof getRemainingCooldownSeconds === 'function' && getRemainingCooldownSeconds() > 0) break;
                     if (vocabItems[i].enableSecondary !== false && (!vocabItems[i].secondaryHasAudio || !vocabItems[i].secondaryWavDataUrl)) {
+                        if (label) label.textContent = `Fila de Áudio: Termo ${i + 1}/${vocabItems.length} (2º Idioma)...`;
                         await window.generateCurrentVocabLangAudio('secondary');
-                        await waitMs(350);
                     }
+                    if (typeof getRemainingCooldownSeconds === 'function' && getRemainingCooldownSeconds() > 0) break;
                     if (vocabItems[i].enableTertiary && (!vocabItems[i].tertiaryHasAudio || !vocabItems[i].tertiaryWavDataUrl)) {
+                        if (label) label.textContent = `Fila de Áudio: Termo ${i + 1}/${vocabItems.length} (3º Idioma)...`;
                         await window.generateCurrentVocabLangAudio('tertiary');
-                        await waitMs(350);
                     }
                 }
                 activeVocabIndex = savedIdx;
                 renderVocabTabsAndEditor();
-                showToast(`Todos os ${vocabItems.length} termos sonorizados com sucesso!`, 'success');
+                if (!(typeof getRemainingCooldownSeconds === 'function' && getRemainingCooldownSeconds() > 0)) {
+                    showToast(`Todos os ${vocabItems.length} termos sonorizados com sucesso!`, 'success');
+                }
             } catch (err) {
                 showToast(err.message, 'error');
             } finally {
+                iuweBatchGenerationActive = false;
                 if (btn) btn.disabled = false;
                 if (icon) icon.className = 'fa-solid fa-microphone-lines';
                 if (label) label.textContent = 'Traduzir & Gerar Vozes de Todos os Termos';
@@ -4958,6 +5098,52 @@ window.IUWE_ASSETS_B64 = {
         // ============================================================================
         // 7. SEED DEMO MULTIMODAL (4 FORMATOS EM ORDEM CRONOLÓGICA) + SYNC NUVEM
         // ============================================================================
+        function ensureDemoSeedPostsIfEmpty() {
+            if (archiveRecords && archiveRecords.some(r => !isRecordArchivedLgpd(r))) return;
+            const myId = getActorHandle();
+            archiveRecords = [
+                {
+                    archiveId: 'ARC-FC-DEMO2026',
+                    moduleType: 'flashcard',
+                    status: 'ACTIVE_PUBLIC',
+                    timestampMs: Date.now() - 60000,
+                    viewsCount: 0,
+                    downloadsCount: 0,
+                    viewedByUsers: {},
+                    downloadedByUsers: {},
+                    creatorMetadata: { handle: myId, displayName: 'ID ' + myId },
+                    publicationMetadata: {
+                        module: 'flashcard',
+                        title: 'Expressões Essenciais de Imigração & Trabalho (EN / FR / PT)',
+                        cefrLevel: 'Intermediário (B1-B2)',
+                        languages: ['en-CA', 'fr-CA', 'pt-BR'],
+                        tags: ['#canada', '#bilingue', '#trabalho'],
+                        flashcardData: {
+                            front: {
+                                langCode: 'en-CA',
+                                langLabel: '🇨🇦 Inglês Canadense',
+                                text: 'Could we schedule a quick follow-up meeting to review the project milestones?',
+                                contextHint: 'Ambiente profissional no Canadá • Estúdio aberto com prática trilíngue (Inglês Canadense, Francês Québécois e Português) e salvamento na nuvem com Google!'
+                            },
+                            backTranslations: [
+                                {
+                                    langCode: 'fr-CA',
+                                    langLabel: '🇨🇦 Francês Québécois',
+                                    text: 'Pourrions-nous planifier une brève rencontre de suivi pour réviser les étapes du projet ?'
+                                },
+                                {
+                                    langCode: 'pt-BR',
+                                    langLabel: '🇧🇷 Português (BR)',
+                                    text: 'Poderíamos agendar uma rápida reunião de acompanhamento para revisar as etapas do projeto?'
+                                }
+                            ]
+                        }
+                    }
+                }
+            ];
+            saveLocalRecords();
+        }
+
         window.refreshFeedFromCloudDb = async function(silent = false) {
             const fbUrl = DEFAULT_FIREBASE_URL.trim().replace(/\/+$/, '');
             const icon = document.getElementById('refresh-feed-icon');
@@ -5029,7 +5215,7 @@ window.IUWE_ASSETS_B64 = {
                         }
                     }
                 }
-                
+                ensureDemoSeedPostsIfEmpty();
                 renderUnifiedFeed();
                 if (!silent) showToast(`Feed cronológico atualizado (${archiveRecords.length} posts das 4 ferramentas)!`, 'success');
             } catch (e) {
@@ -6310,7 +6496,7 @@ window.IUWE_ASSETS_B64 = {
         window.addEventListener('DOMContentLoaded', () => {
             loadSavedUserPrefs();
             loadLocalRecords();
-            
+            ensureDemoSeedPostsIfEmpty();
 
             // Se estivermos em uma das 6 páginas do Aplicativo/Estúdio (possui #unified-feed-container):
             if (document.getElementById('unified-feed-container')) {
@@ -6676,7 +6862,7 @@ window.IUWE_ASSETS_B64 = {
                 let idToken = '';
                 try {
                     if (typeof firebaseUser.getIdToken === 'function') {
-                        idToken = await firebaseUser.getIdToken();
+                        idToken = await Promise.race([firebaseUser.getIdToken(), new Promise(function(r){ setTimeout(function(){ r(''); }, 1200); })]);
                     }
                 } catch (e) {}
 
@@ -7134,21 +7320,21 @@ window.IUWE_ASSETS_B64 = {
         // ============================================================================
         const IUWE_RESOURCE_LIMITS = {
             audiocastMaxCharsPerBlock: 280,
-            audiocastMaxAudioBlocks: 6,
-            audiocastMaxTotalBlocks: 10,
-            audiocastMaxDurationSec: 60,
+            audiocastMaxAudioBlocks: 12,
+            audiocastMaxTotalBlocks: 24,
+            audiocastMaxDurationSec: 120,
             flashcardMaxFrontChars: 240,
             flashcardMaxHintChars: 140,
             flashcardMaxBackChars: 240,
             flashcardMaxBackLangs: 3,
             bookletMaxTitleChars: 110,
             bookletMaxSlideChars: 260,
-            bookletMaxSlides: 5,
+            bookletMaxSlides: 6,
             vocabMaxThemeChars: 110,
             vocabMaxTermChars: 110,
             vocabMaxSentenceChars: 260,
             vocabMaxNoteChars: 140,
-            vocabMaxItems: 5,
+            vocabMaxItems: 6,
             maxDailyPostsPerTool: 6,
             maxPayloadBytes: 5 * 1024 * 1024,
             feedCacheTtlMs: 5 * 60 * 1000,
@@ -7267,13 +7453,14 @@ window.IUWE_ASSETS_B64 = {
                 if (el) el.setAttribute('maxlength', String(maxMap[id]));
             });
 
-            // Restringe seletor do Gerador de Vocabulário para no máximo 5 sentenças
+            // Restringe seletor do Gerador de Vocabulário para até 6 sentenças (termos)
             const vcCountSel = document.getElementById('vc-count-select');
             if (vcCountSel) {
                 vcCountSel.innerHTML = [
                     '<option value="3" selected>3 Sentenças (Termos)</option>',
                     '<option value="4">4 Sentenças (Termos)</option>',
-                    '<option value="5">5 Sentenças (Máx. p/ Arquivo Leve)</option>'
+                    '<option value="5">5 Sentenças (Termos)</option>',
+                    '<option value="6">6 Sentenças (Máx. p/ Arquivo Leve)</option>'
                 ].join('');
             }
 
@@ -7434,7 +7621,7 @@ window.IUWE_ASSETS_B64 = {
                                 }
                             }
                         }
-                        
+                        ensureDemoSeedPostsIfEmpty();
                         renderUnifiedFeed();
                         updateQuotaBadgesUi();
                         if (!silent) showToast('Feed atualizado da nuvem (últimos ' + Math.min(archiveRecords.length, IUWE_RESOURCE_LIMITS.feedCloudPageLimit) + ' posts)!', 'success');
@@ -7464,29 +7651,30 @@ window.IUWE_ASSETS_B64 = {
         });
 
         // ============================================================================
-        // PAUSA DE SEGURANÇA (TEMP BLOCK DE 8s ENTRE GERAÇÕES) + SELETOR DE CORES (v2.0)
+        // FILA DE PRIORIDADE DE RECURSOS + PACE DE CHAMADAS + BLOQUEIO DE 60s PÓS-LIMITE
         // ============================================================================
-        const IUWE_API_COOLDOWN_SECONDS = 8;
+        const IUWE_API_COOLDOWN_SECONDS = 4; // Pausa curta entre chamadas normais (rotação multi-modelo 3.8/3.1)
         let iuweApiBusyNow = false;
         let iuweApiCooldownUntilMs = 0;
+        let iuweApiCooldownReason = '';
         let iuweApiCooldownTimerId = null;
 
+        // Apenas botões que consomem IA (Áudio Neural TTS e Gerador de Frases do Vocabulário IA).
+        // Botões de tradução são 100% gratuitos (zero chamadas de IA) e ficam sempre livres!
         const STUDIO_GEN_BUTTON_SELECTORS = [
             '#btn-add-audio-block',
-            '#btn-translate-source',
             '#btn-gen-front-audio',
             '[id^="btn-gen-back-audio-"]',
-            '[onclick*="translateSingleBackItem"]',
-            '[onclick*="translateFrontTextToSelectedLang"]',
+            '#btn-gen-all-card-audios',
             '#bk-btn-gen-primary-audio',
             '#bk-btn-gen-secondary-audio',
             '#bk-btn-gen-tertiary-audio',
-            '[onclick*="translateCurrentSlide"]',
+            '#btn-gen-all-booklet',
             '#btn-generate-ai-vocab',
             '#vc-btn-gen-primary-audio',
             '#vc-btn-gen-secondary-audio',
             '#vc-btn-gen-tertiary-audio',
-            '[onclick*="translateCurrentVocabTierFromPrimary"]'
+            '#btn-gen-all-vocab-audios'
         ].join(', ');
 
         function getRemainingCooldownSeconds() {
@@ -7514,26 +7702,37 @@ window.IUWE_ASSETS_B64 = {
                 if (!el) return;
                 if (iuweApiBusyNow) {
                     el.className = 'rounded-xl px-3 py-1.5 text-[11px] font-extrabold bg-amber-100 border border-amber-400 text-amber-950 flex items-center justify-between gap-2';
-                    el.innerHTML = '<span><i class="fa-solid fa-spinner animate-spin mr-1.5"></i>Processando solicitação na API... Outros botões de geração estão temporariamente bloqueados.</span>';
+                    el.innerHTML = '<span><i class="fa-solid fa-spinner animate-spin mr-1.5"></i>Fila de Prioridade IA ativa (Gemini 3.8 Flash-Lite / 3.8 Flash / 3.1 TTS)... Processando chamada respeitando o tempo da API.</span>';
                 } else if (rem > 0) {
-                    el.className = 'rounded-xl px-3 py-1.5 text-[11px] font-extrabold bg-amber-50 border border-amber-300 text-amber-900 flex items-center justify-between gap-2';
-                    el.innerHTML = '<span><i class="fa-solid fa-hourglass-half text-amber-600 mr-1.5"></i>Pausa anti-bloqueio da API ativa: aguarde <b>' + rem + 's</b> antes de clicar em outro botão de geração.</span><span class="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px]">' + rem + 's</span>';
+                    const isLongLock = rem > 10;
+                    el.className = 'rounded-xl px-3 py-1.5 text-[11px] font-extrabold ' + (isLongLock ? 'bg-rose-50 border border-rose-300 text-rose-900' : 'bg-amber-50 border border-amber-300 text-amber-900') + ' flex items-center justify-between gap-2';
+                    el.innerHTML = '<span><i class="fa-solid fa-hourglass-half ' + (isLongLock ? 'text-rose-600' : 'text-amber-600') + ' mr-1.5"></i>' +
+                        (isLongLock
+                            ? ('Bloqueio temporário anti-penalidade Google (60s): aguarde <b>' + rem + 's</b> antes de enviar qualquer nova tentativa.')
+                            : ('Sincronizando fila de recursos da API: aguarde <b>' + rem + 's</b> para a próxima chamada.')) +
+                        '</span><span class="px-2 py-0.5 rounded-full ' + (isLongLock ? 'bg-rose-600' : 'bg-amber-500') + ' text-white text-[10px]">' + rem + 's</span>';
                 } else {
                     el.className = 'rounded-xl px-3 py-1.5 text-[10.5px] font-bold bg-emerald-50/80 border border-emerald-200 text-emerald-900 flex items-center justify-between gap-2';
-                    el.innerHTML = '<span><i class="fa-solid fa-shield-heart text-emerald-600 mr-1.5"></i>Proteção Anti-Bloqueio de API ativa: gere 1 áudio/tradução por vez (pausa automática de ' + IUWE_API_COOLDOWN_SECONDS + 's entre cliques).</span>';
+                    el.innerHTML = '<span><i class="fa-solid fa-shield-heart text-emerald-600 mr-1.5"></i>Fila de Prioridade IA ativa (3.8 Flash-Lite / 3.8 Flash / 3.1 TTS) • Tradução 100% Gratuita (0 calls IA) • Bloqueio de proteção de 60s pós-limite.</span>';
                 }
             });
         }
 
-        function startCooldownTicker(seconds) {
+        function startCooldownTicker(seconds, reasonText = '') {
             iuweApiBusyNow = false;
-            iuweApiCooldownUntilMs = Date.now() + (seconds * 1000);
+            const targetUntil = Date.now() + (seconds * 1000);
+            // Nunca reduz um bloqueio de 60s já ativo por uma pausa curta de 4s!
+            if (targetUntil > iuweApiCooldownUntilMs) {
+                iuweApiCooldownUntilMs = targetUntil;
+                if (reasonText) iuweApiCooldownReason = reasonText;
+            }
             if (iuweApiCooldownTimerId) clearInterval(iuweApiCooldownTimerId);
             updateStudioCooldownBannersAndButtons();
             iuweApiCooldownTimerId = setInterval(function() {
                 const rem = getRemainingCooldownSeconds();
                 updateStudioCooldownBannersAndButtons();
                 if (rem <= 0) {
+                    iuweApiCooldownReason = '';
                     clearInterval(iuweApiCooldownTimerId);
                     iuweApiCooldownTimerId = null;
                 }
@@ -7543,12 +7742,16 @@ window.IUWE_ASSETS_B64 = {
         function withApiCooldownGuard(fn, cooldownSec) {
             return async function() {
                 const rem = getRemainingCooldownSeconds();
-                if (iuweApiBusyNow) {
-                    showToast('⏳ Aguarde a geração atual terminar antes de clicar em outro botão!', 'info');
+                if (rem > 0) {
+                    showToast('⏳ Bloqueio temporário da API ativo: aguarde mais ' + rem + 's antes de enviar nova tentativa!', 'info');
                     return;
                 }
-                if (rem > 0) {
-                    showToast('⏳ Pausa de segurança da API: aguarde mais ' + rem + 's antes de gerar o próximo item!', 'info');
+                // Se estivermos dentro de uma execução em lote ("Gerar Todos"), a fila de prioridade gerencia o espaçamento item a item
+                if (iuweBatchGenerationActive) {
+                    return await fn.apply(this, arguments);
+                }
+                if (iuweApiBusyNow) {
+                    showToast('⏳ Aguarde a chamada atual da fila terminar antes de iniciar outra!', 'info');
                     return;
                 }
                 iuweApiBusyNow = true;
@@ -7556,7 +7759,14 @@ window.IUWE_ASSETS_B64 = {
                 try {
                     return await fn.apply(this, arguments);
                 } finally {
-                    startCooldownTicker(cooldownSec || IUWE_API_COOLDOWN_SECONDS);
+                    const postRem = getRemainingCooldownSeconds();
+                    if (postRem > 0) {
+                        // Um bloqueio de 60s já foi engatilhado durante a chamada
+                        iuweApiBusyNow = false;
+                        updateStudioCooldownBannersAndButtons();
+                    } else {
+                        startCooldownTicker(cooldownSec || IUWE_API_COOLDOWN_SECONDS);
+                    }
                 }
             };
         }
@@ -7656,7 +7866,7 @@ window.IUWE_ASSETS_B64 = {
         };
 
         function installApiCooldownAndColorHooks() {
-            const fnsToGuard8s = [
+            const fnsToGuardAi = [
                 'addAudioBlock',
                 'generateFrontSideAudio',
                 'generateSingleBackItemAudio',
@@ -7664,27 +7874,10 @@ window.IUWE_ASSETS_B64 = {
                 'generateVocabularyListWithGeminiAI',
                 'generateCurrentVocabLangAudio'
             ];
-            const fnsToGuard5s = [
-                'translateSourceTextToTarget',
-                'translateFrontTextToSelectedLang',
-                'translateSingleBackItem',
-                'translateCurrentSlidePrimaryText',
-                'translateCurrentSlideSecondaryFromPrimary',
-                'translateCurrentSlideTertiaryFromPrimary',
-                'translateCurrentVocabTierFromPrimary'
-            ];
 
-            fnsToGuard8s.forEach(function(fnName) {
+            fnsToGuardAi.forEach(function(fnName) {
                 if (typeof window[fnName] === 'function' && !window[fnName]._hasCooldownGuard) {
                     const wrapped = withApiCooldownGuard(window[fnName], IUWE_API_COOLDOWN_SECONDS);
-                    wrapped._hasCooldownGuard = true;
-                    window[fnName] = wrapped;
-                }
-            });
-
-            fnsToGuard5s.forEach(function(fnName) {
-                if (typeof window[fnName] === 'function' && !window[fnName]._hasCooldownGuard) {
-                    const wrapped = withApiCooldownGuard(window[fnName], 5);
                     wrapped._hasCooldownGuard = true;
                     window[fnName] = wrapped;
                 }
