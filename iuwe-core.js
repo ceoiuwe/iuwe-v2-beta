@@ -813,6 +813,8 @@ window.IUWE_ASSETS_B64 = {
             }
         }
 
+        
+
         window.addCustomFollowedUserId = function() {
             const inp = document.getElementById('new-follow-userid-input');
             if (!inp || !inp.value.trim()) return;
@@ -977,7 +979,8 @@ window.IUWE_ASSETS_B64 = {
 
             if (secFeed) secFeed.classList.toggle('hidden', !(tabName === 'public' || tabName === 'personal' || tabName === 'saved'));
             if (secCreate) secCreate.classList.toggle('hidden', tabName !== 'create');
-
+            
+            
             if (secConfig) secConfig.classList.toggle('hidden', tabName !== 'config');
             const calloutEl = document.getElementById('hybrid-unauth-callout-banner');
             if (calloutEl) calloutEl.classList.toggle('hidden', (typeof isUserGoogleAuthenticated === 'function' && isUserGoogleAuthenticated()) || !(tabName === 'personal' || tabName === 'saved'));
@@ -1985,6 +1988,7 @@ window.IUWE_ASSETS_B64 = {
 <\/body>
 <\/html>`;
         }
+
 
         // ============================================================================
         // 5. CONSTRUTORES DAS 4 OPÇÕES DE CONTEÚDO (AUDIOCAST, FLASHCARD, LIVRETO, VOCAB)
@@ -4950,17 +4954,10 @@ window.IUWE_ASSETS_B64 = {
             await pushRecordToCloud(rec, streamMemoryCache[archiveId]);
         };
 
+
         // ============================================================================
         // 7. SEED DEMO MULTIMODAL (4 FORMATOS EM ORDEM CRONOLÓGICA) + SYNC NUVEM
         // ============================================================================
-                                    ]
-                        }
-                    }
-                }
-            ];
-            saveLocalRecords();
-        }
-
         window.refreshFeedFromCloudDb = async function(silent = false) {
             const fbUrl = DEFAULT_FIREBASE_URL.trim().replace(/\/+$/, '');
             const icon = document.getElementById('refresh-feed-icon');
@@ -5371,6 +5368,7 @@ window.IUWE_ASSETS_B64 = {
             return Math.max(0, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
         }
 
+        
         // ============================================================================
         // ============================================================================
         // INTERFACE 100% EM PORTUGUÊS (PT-BR) — SELETOR E DICIONÁRIOS ESTRANGEIROS REMOVIDOS
@@ -6031,6 +6029,8 @@ window.IUWE_ASSETS_B64 = {
             showToast('Prancha visual (.PNG) baixada!', 'success');
         };
 
+
+
         window.sharePostViaWhatsApp = function() {
             const rec = archiveRecords.find(r => r.archiveId === activeShareRecordId);
             const title = rec?.publicationMetadata?.title || activeShareRecordId;
@@ -6170,6 +6170,7 @@ window.IUWE_ASSETS_B64 = {
             }
         };
 
+        
         // ============================================================================
         // V2.0 UPGRADE:
         // 1) TRADUÇÃO 100% GRATUITA (POUPA A CHAVE DO USUÁRIO)
@@ -6309,6 +6310,7 @@ window.IUWE_ASSETS_B64 = {
         window.addEventListener('DOMContentLoaded', () => {
             loadSavedUserPrefs();
             loadLocalRecords();
+            
 
             // Se estivermos em uma das 6 páginas do Aplicativo/Estúdio (possui #unified-feed-container):
             if (document.getElementById('unified-feed-container')) {
@@ -6341,6 +6343,7 @@ window.IUWE_ASSETS_B64 = {
                 setTimeout(() => { window.refreshFeedFromCloudDb(true); }, 500);
             }
         });
+    
 
         // ============================================================================
         // MOTOR HÍBRIDO IUWE v2.0: ESTÚDIO ABERTO + LOGIN GOOGLE SOB DEMANDA + KYC
@@ -7124,6 +7127,7 @@ window.IUWE_ASSETS_B64 = {
             }
             return _origRemoteCloudFetch(finalUrl, opts);
         };
+
 
         // ============================================================================
         // CONTROLE DE COTAS DIÁRIAS, LIMITES ANTI-ARQUIVOS GIGANTES E CACHE DE 5 MIN
