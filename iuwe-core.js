@@ -813,8 +813,6 @@ window.IUWE_ASSETS_B64 = {
             }
         }
 
-        
-
         window.addCustomFollowedUserId = function() {
             const inp = document.getElementById('new-follow-userid-input');
             if (!inp || !inp.value.trim()) return;
@@ -979,8 +977,7 @@ window.IUWE_ASSETS_B64 = {
 
             if (secFeed) secFeed.classList.toggle('hidden', !(tabName === 'public' || tabName === 'personal' || tabName === 'saved'));
             if (secCreate) secCreate.classList.toggle('hidden', tabName !== 'create');
-            
-            
+
             if (secConfig) secConfig.classList.toggle('hidden', tabName !== 'config');
             const calloutEl = document.getElementById('hybrid-unauth-callout-banner');
             if (calloutEl) calloutEl.classList.toggle('hidden', (typeof isUserGoogleAuthenticated === 'function' && isUserGoogleAuthenticated()) || !(tabName === 'personal' || tabName === 'saved'));
@@ -1988,7 +1985,6 @@ window.IUWE_ASSETS_B64 = {
 <\/body>
 <\/html>`;
         }
-
 
         // ============================================================================
         // 5. CONSTRUTORES DAS 4 OPÇÕES DE CONTEÚDO (AUDIOCAST, FLASHCARD, LIVRETO, VOCAB)
@@ -4954,49 +4950,10 @@ window.IUWE_ASSETS_B64 = {
             await pushRecordToCloud(rec, streamMemoryCache[archiveId]);
         };
 
-
         // ============================================================================
         // 7. SEED DEMO MULTIMODAL (4 FORMATOS EM ORDEM CRONOLÓGICA) + SYNC NUVEM
         // ============================================================================
-        function ensureDemoSeedPostsIfEmpty() {
-            if (archiveRecords && archiveRecords.some(r => !isRecordArchivedLgpd(r))) return;
-            const myId = getActorHandle();
-            archiveRecords = [
-                {
-                    archiveId: 'ARC-FC-DEMO2026',
-                    moduleType: 'flashcard',
-                    status: 'ACTIVE_PUBLIC',
-                    timestampMs: Date.now() - 60000,
-                    viewsCount: 0,
-                    downloadsCount: 0,
-                    viewedByUsers: {},
-                    downloadedByUsers: {},
-                    creatorMetadata: { handle: myId, displayName: 'ID ' + myId },
-                    publicationMetadata: {
-                        module: 'flashcard',
-                        title: 'Expressões Essenciais de Imigração & Trabalho (EN / FR / PT)',
-                        cefrLevel: 'Intermediário (B1-B2)',
-                        languages: ['en-CA', 'fr-CA', 'pt-BR'],
-                        tags: ['#canada', '#bilingue', '#trabalho'],
-                        flashcardData: {
-                            front: {
-                                langCode: 'en-CA',
-                                langLabel: '🇨🇦 Inglês Canadense',
-                                text: 'Could we schedule a quick follow-up meeting to review the project milestones?',
-                                contextHint: 'Ambiente profissional no Canadá • Estúdio aberto com prática trilíngue (Inglês Canadense, Francês Québécois e Português) e salvamento na nuvem com Google!'
-                            },
-                            backTranslations: [
-                                {
-                                    langCode: 'fr-CA',
-                                    langLabel: '🇨🇦 Francês Québécois',
-                                    text: 'Pourrions-nous planifier une brève rencontre de suivi pour réviser les étapes du projet ?'
-                                },
-                                {
-                                    langCode: 'pt-BR',
-                                    langLabel: '🇧🇷 Português (BR)',
-                                    text: 'Poderíamos agendar uma rápida reunião de acompanhamento para revisar as etapas do projeto?'
-                                }
-                            ]
+                                    ]
                         }
                     }
                 }
@@ -5075,7 +5032,7 @@ window.IUWE_ASSETS_B64 = {
                         }
                     }
                 }
-                ensureDemoSeedPostsIfEmpty();
+                
                 renderUnifiedFeed();
                 if (!silent) showToast(`Feed cronológico atualizado (${archiveRecords.length} posts das 4 ferramentas)!`, 'success');
             } catch (e) {
@@ -5414,7 +5371,6 @@ window.IUWE_ASSETS_B64 = {
             return Math.max(0, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
         }
 
-        
         // ============================================================================
         // ============================================================================
         // INTERFACE 100% EM PORTUGUÊS (PT-BR) — SELETOR E DICIONÁRIOS ESTRANGEIROS REMOVIDOS
@@ -6075,8 +6031,6 @@ window.IUWE_ASSETS_B64 = {
             showToast('Prancha visual (.PNG) baixada!', 'success');
         };
 
-
-
         window.sharePostViaWhatsApp = function() {
             const rec = archiveRecords.find(r => r.archiveId === activeShareRecordId);
             const title = rec?.publicationMetadata?.title || activeShareRecordId;
@@ -6216,7 +6170,6 @@ window.IUWE_ASSETS_B64 = {
             }
         };
 
-        
         // ============================================================================
         // V2.0 UPGRADE:
         // 1) TRADUÇÃO 100% GRATUITA (POUPA A CHAVE DO USUÁRIO)
@@ -6356,7 +6309,6 @@ window.IUWE_ASSETS_B64 = {
         window.addEventListener('DOMContentLoaded', () => {
             loadSavedUserPrefs();
             loadLocalRecords();
-            ensureDemoSeedPostsIfEmpty();
 
             // Se estivermos em uma das 6 páginas do Aplicativo/Estúdio (possui #unified-feed-container):
             if (document.getElementById('unified-feed-container')) {
@@ -6389,7 +6341,6 @@ window.IUWE_ASSETS_B64 = {
                 setTimeout(() => { window.refreshFeedFromCloudDb(true); }, 500);
             }
         });
-    
 
         // ============================================================================
         // MOTOR HÍBRIDO IUWE v2.0: ESTÚDIO ABERTO + LOGIN GOOGLE SOB DEMANDA + KYC
@@ -7174,7 +7125,6 @@ window.IUWE_ASSETS_B64 = {
             return _origRemoteCloudFetch(finalUrl, opts);
         };
 
-
         // ============================================================================
         // CONTROLE DE COTAS DIÁRIAS, LIMITES ANTI-ARQUIVOS GIGANTES E CACHE DE 5 MIN
         // ============================================================================
@@ -7480,7 +7430,7 @@ window.IUWE_ASSETS_B64 = {
                                 }
                             }
                         }
-                        ensureDemoSeedPostsIfEmpty();
+                        
                         renderUnifiedFeed();
                         updateQuotaBadgesUi();
                         if (!silent) showToast('Feed atualizado da nuvem (últimos ' + Math.min(archiveRecords.length, IUWE_RESOURCE_LIMITS.feedCloudPageLimit) + ' posts)!', 'success');
