@@ -7320,9 +7320,9 @@ window.IUWE_ASSETS_B64 = {
         // ============================================================================
         const IUWE_RESOURCE_LIMITS = {
             audiocastMaxCharsPerBlock: 280,
-            audiocastMaxAudioBlocks: 12,
+            audiocastMaxAudioBlocks: 24,
             audiocastMaxTotalBlocks: 24,
-            audiocastMaxDurationSec: 120,
+            audiocastMaxDurationSec: 60,
             flashcardMaxFrontChars: 240,
             flashcardMaxHintChars: 140,
             flashcardMaxBackChars: 240,
